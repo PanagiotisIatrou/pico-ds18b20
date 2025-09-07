@@ -28,6 +28,19 @@ bool read_bit() {
     return data;
 }
 
+bool wait_for_bit(bool bit, int max_time_us) {
+    uint32_t start_time = to_us_since_boot(get_absolute_time());
+    while (to_us_since_boot(get_absolute_time()) - start_time < max_time_us) {
+        if (gpio_get(data_pin) == bit) {
+            return true;
+        }
+
+        sleep_us(1);
+    }
+
+    return false;
+}
+
 int main()
 {
     stdio_init_all();
@@ -49,34 +62,14 @@ int main()
     // Wait for presence pulse
     gpio_set_dir(data_pin, GPIO_IN);
     sleep_us(5);
-    bool detected_presence_pulse = false;
-    uint32_t presence_pulse_start_time = to_us_since_boot(get_absolute_time());
-    while (to_us_since_boot(get_absolute_time()) - presence_pulse_start_time < 240 + 55) {
-        if (gpio_get(data_pin) == 0) {
-            detected_presence_pulse = true;
-            break;
-        }
-
-        sleep_us(1);
-    }
-
+    bool detected_presence_pulse = wait_for_bit(0, 240 + 55);
     if (!detected_presence_pulse) {
         printf(":( Did not detect presence pulse!\n");
         return 0;
     }
 
     // Wait for presence pulse to end
-    bool detected_presence_pulse_end = false;
-    presence_pulse_start_time = to_us_since_boot(get_absolute_time());
-    while (to_us_since_boot(get_absolute_time()) - presence_pulse_start_time < 240) {
-        if (gpio_get(data_pin) == 1) {
-            detected_presence_pulse_end = true;
-            break;
-        }
-
-        sleep_us(1);
-    }
-
+    bool detected_presence_pulse_end = wait_for_bit(1, 240);
     if (!detected_presence_pulse_end) {
         printf(":( Did not detect presence pulse end!\n");
         return 0;
@@ -125,6 +118,6 @@ int main()
     printf("\n");
 
     fflush(stdout);
-    sleep_ms(1);
+    sleep_ms(1000);
     return 0;
 }
