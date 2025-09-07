@@ -25,13 +25,6 @@ int main()
     sleep_ms(1000);
     printf("Starting...\n");
 
-    // int count = 0;
-    // while (true) {
-    //     count++;
-    //     printf("Hello, world! %d\n", count);
-    //     sleep_ms(1000);
-    // }
-
     // Initialize data pin
     gpio_init(data_pin);
     gpio_pull_up(data_pin);
@@ -43,12 +36,12 @@ int main()
 
     // Wait for presence pulse
     gpio_set_dir(data_pin, GPIO_IN);
-    sleep_us(70); // 10uS for rising edge + 15-60uS for slave waiting
+    sleep_us(65); // 10uS for rising edge + 15-60uS for slave waiting
     int max_presence_pulse_wait_time = 240;
     bool detected_presence_pulse = false;
     uint32_t presence_pulse_start_time = to_us_since_boot(get_absolute_time());
     while (!detected_presence_pulse) {
-        if (to_us_since_boot(get_absolute_time()) - presence_pulse_start_time > 240) {
+        if (to_us_since_boot(get_absolute_time()) - presence_pulse_start_time > max_presence_pulse_wait_time) {
             break;
         }
 
@@ -71,7 +64,7 @@ int main()
     bool detected_presence_pulse_end = false;
     presence_pulse_start_time = to_us_since_boot(get_absolute_time());
     while (gpio_get(data_pin) == 0) {
-        if (to_us_since_boot(get_absolute_time()) - presence_pulse_start_time > 240) {
+        if (to_us_since_boot(get_absolute_time()) - presence_pulse_start_time > max_presence_pulse_wait_time) {
             break;
         }
 
@@ -93,9 +86,9 @@ int main()
     // Send ROM command
     char command[8] = "00110011";
     for (int i = 7; i >= 0; i--) {
-        bool bit = command[i] == "1";
+        bool bit = command[i] == '1';
         write_value(bit);
-        sleep_us(1);
+        sleep_us(5);
     }
 
     printf("Wrote ROM command!\n");
