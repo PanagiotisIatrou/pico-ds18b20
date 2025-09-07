@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include "pico/stdlib.h"
 
+#include "rom.hpp"
+
 const int data_pin = 0;
 
 void write_bit(bool value) {
@@ -76,44 +78,43 @@ int main()
     }
 
     // Send ROM command
-    char command[8] = "00110011";
-    for (int i = 7; i >= 0; i--) {
-        bool bit = command[i] == '1';
+    uint8_t command = 0b00110011;
+    for (int i = 0; i < 8; i++) {
+        bool bit = (command >> i) & 0x01;
         write_bit(bit);
         sleep_us(5);
     }
 
+    Rom rom;
+
     // Receive family code
-    char family_code[8];
     for (int i = 7; i >= 0; i--) {
-        family_code[i] = read_bit(i) ? '1' : '0';
+        rom.family_code[i] = read_bit() ? '1' : '0';
         sleep_us(5);
     }
 
     // Receive family code
-    char serial_number[48];
     for (int i = 47; i >= 0; i--) {
-        serial_number[i] = read_bit(i) ? '1' : '0';
+        rom.serial_number[i] = read_bit() ? '1' : '0';
         sleep_us(5);
     }
 
     // Receive CRC code
-    char crc_code[8];
     for (int i = 7; i >= 0; i--) {
-        crc_code[i] = read_bit(i) ? '1' : '0';
+        rom.crc_code[i] = read_bit() ? '1' : '0';
         sleep_us(5);
     }
 
     for (int i = 0; i < 8; i++) {
-        printf("%c", family_code[i]);
+        printf("%c", rom.family_code[i]);
     }
     printf("\n");
     for (int i = 0; i < 48; i++) {
-        printf("%c", serial_number[i]);
+        printf("%c", rom.serial_number[i]);
     }
     printf("\n");
     for (int i = 0; i < 8; i++) {
-        printf("%c", crc_code[i]);
+        printf("%c", rom.crc_code[i]);
     }
     printf("\n");
 
