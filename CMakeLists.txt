@@ -35,7 +35,7 @@ pico_sdk_init()
 
 # Add executable. Default name is the project name, version 0.1
 
-add_executable(ds18b20 ds18b20.cpp )
+add_executable(ds18b20 ds18b20.cpp one_wire.cpp)
 
 pico_set_program_name(ds18b20 "ds18b20")
 pico_set_program_version(ds18b20 "0.1")
