@@ -17,4 +17,6 @@ public:
     bool presence_pulse();
 
     void read_rom();
+
+    void match_rom();
 };

@@ -57,3 +57,25 @@ void Device::read_rom() {
         sleep_us(5);
     }
 }
+
+void Device::match_rom() {
+    send_rom_command("01010101");
+
+    // Send family code
+    for (int i = 7; i >= 0; i--) {
+        one_wire.write_bit(rom.family_code[i]);
+        sleep_us(5);
+    }
+
+    // Send family code
+    for (int i = 47; i >= 0; i--) {
+        one_wire.write_bit(rom.serial_number[i]);
+        sleep_us(5);
+    }
+
+    // Send CRC code
+    for (int i = 7; i >= 0; i--) {
+        one_wire.write_bit(rom.crc_code[i]);
+        sleep_us(5);
+    }
+}
