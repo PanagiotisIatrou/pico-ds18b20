@@ -1,6 +1,6 @@
 #include "device.hpp"
 
-#include <cstring.h>
+#include <cstring>
 #include "pico/stdlib.h"
 
 Device::Device(OneWire& one_wire) : one_wire(one_wire) { }
@@ -28,19 +28,17 @@ bool Device::presence_pulse() {
     return true;
 }
 
-void Device::send_rom_command(char command[8]) {
+void Device::send_rom_command(const char command[8]) {
     for (int i = 7; i >= 0; i--) {
-        bool bit = command[i] == '1' ? true : false;
+        bool bit = command[i] == '1';
         one_wire.write_bit(bit);
         sleep_us(5);
     }
-
-    if (strcmp(command, "00110011") == 0) {
-        read_rom();
-    }
 }
 
-void read_rom() {
+void Device::read_rom() {
+    send_rom_command("00110011");
+
     // Receive family code
     for (int i = 7; i >= 0; i--) {
         rom.family_code[i] = one_wire.read_bit() ? '1' : '0';

@@ -1,3 +1,6 @@
 usbipd list
 cd \\wsl.localhost\Ubuntu-24.04\home\panagiotis\pico_projects\ds18b20
 run bat from GUI
+
+read rom: 33h - 00110011
+match rom: 55h - 01010101

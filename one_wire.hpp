@@ -1,3 +1,5 @@
+#pragma once
+
 enum OneWireState { READ, WRITE };
 
 class OneWire {

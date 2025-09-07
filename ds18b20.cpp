@@ -26,7 +26,7 @@ int main()
     }
 
     // Send read ROM command
-    device.send_rom_command("00110011");
+    device.read_rom();
 
     fflush(stdout);
     sleep_ms(1000);

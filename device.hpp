@@ -1,18 +1,20 @@
+#pragma once
+
 #include "rom.hpp"
 #include "one_wire.hpp"
 
 class Device {
 private:
     OneWire& one_wire;
+    Rom rom;
 
-    void read_rom();
+    void send_rom_command(const char command[8]);
 
 public:
-    Rom rom;
 
     Device(OneWire& one_wire);
 
     bool presence_pulse();
 
-    void send_rom_command(char command[8]);
+    void read_rom();
 };

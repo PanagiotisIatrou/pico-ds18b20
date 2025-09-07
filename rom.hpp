@@ -1,3 +1,5 @@
+#pragma once
+
 struct Rom {
     char family_code[8];
     char serial_number[48];
