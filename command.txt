@@ -1,0 +1,3 @@
+usbipd list
+cd \\wsl.localhost\Ubuntu-24.04\home\panagiotis\pico_projects\ds18b20
+run bat from GUI
