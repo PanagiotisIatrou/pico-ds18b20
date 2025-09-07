@@ -16,9 +16,8 @@ int main()
     sleep_ms(1000);
     printf("Starting...\n");
 
-    // Initialize data pin
+    // Initialize a device on the data pin
     OneWire one_wire(data_pin);
-
     Device device(one_wire);
 
     if (!device.presence_pulse()) {
@@ -26,21 +25,8 @@ int main()
         return 0;
     }
 
-    // Send ROM command
+    // Send read ROM command
     device.send_rom_command("00110011");
-
-    for (int i = 0; i < 8; i++) {
-        printf("%c", device.rom.family_code[i]);
-    }
-    printf("\n");
-    for (int i = 0; i < 48; i++) {
-        printf("%c", device.rom.serial_number[i]);
-    }
-    printf("\n");
-    for (int i = 0; i < 8; i++) {
-        printf("%c", device.rom.crc_code[i]);
-    }
-    printf("\n");
 
     fflush(stdout);
     sleep_ms(1000);
