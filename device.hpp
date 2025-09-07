@@ -8,7 +8,7 @@ private:
     OneWire& one_wire;
     Rom rom;
 
-    void send_rom_command(const char command[8]);
+    void send_command(const char command[8]);
 
 public:
 

@@ -28,7 +28,7 @@ bool Device::presence_pulse() {
     return true;
 }
 
-void Device::send_rom_command(const char command[8]) {
+void Device::send_command(const char command[8]) {
     for (int i = 7; i >= 0; i--) {
         bool bit = command[i] == '1';
         one_wire.write_bit(bit);
@@ -37,7 +37,7 @@ void Device::send_rom_command(const char command[8]) {
 }
 
 void Device::read_rom() {
-    send_rom_command("00110011");
+    send_command("00110011");
 
     // Receive family code
     for (int i = 7; i >= 0; i--) {
@@ -59,7 +59,7 @@ void Device::read_rom() {
 }
 
 void Device::match_rom() {
-    send_rom_command("01010101");
+    send_command("01010101");
 
     // Send family code
     for (int i = 7; i >= 0; i--) {
