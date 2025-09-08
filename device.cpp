@@ -15,13 +15,13 @@ bool Device::presence_pulse() {
     // Wait for presence pulse
     one_wire.set_state(OneWireState::READ);
     sleep_us(5);
-    bool detected_presence_pulse = one_wire.wait_for_bit(0, 240 + 55);
+    bool detected_presence_pulse = one_wire.wait_us_for_bit(0, 240 + 55);
     if (!detected_presence_pulse) {
         return false;
     }
 
     // Wait for presence pulse to end
-    bool detected_presence_pulse_end = one_wire.wait_for_bit(1, 240);
+    bool detected_presence_pulse_end = one_wire.wait_us_for_bit(1, 240);
     if (!detected_presence_pulse_end) {
         return false;
     }
@@ -72,7 +72,7 @@ void Device::match_rom() {
         sleep_us(5);
     }
 
-    // Send family code
+    // Send serial number
     for (int i = 47; i >= 0; i--) {
         one_wire.write_bit(rom.serial_number[i]);
         sleep_us(5);
