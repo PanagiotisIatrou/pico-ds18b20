@@ -46,7 +46,7 @@ bool OneWire::read_bit() {
     return data;
 }
 
-bool OneWire::wait_for_bit(bool bit, int max_time_us) {
+bool OneWire::wait_us_for_bit(bool bit, int max_time_us) {
     uint32_t start_time = to_us_since_boot(get_absolute_time());
     while (to_us_since_boot(get_absolute_time()) - start_time < max_time_us) {
         if (gpio_get(data_pin) == bit) {
@@ -57,4 +57,8 @@ bool OneWire::wait_for_bit(bool bit, int max_time_us) {
     }
 
     return false;
+}
+
+bool OneWire::wait_ms_for_bit(bool bit, int max_time_ms) {
+    return wait_us_for_bit(bit, max_time_ms * 1000);
 }

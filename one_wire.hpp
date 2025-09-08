@@ -20,5 +20,7 @@ public:
 
     bool read_bit();
 
-    bool wait_for_bit(bool bit, int max_time_us);
+    bool wait_us_for_bit(bool bit, int max_time_us);
+
+    bool wait_ms_for_bit(bool bit, int max_time_ms);
 };
