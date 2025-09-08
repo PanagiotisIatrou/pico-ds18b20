@@ -7,7 +7,7 @@ class Device {
 private:
     OneWire& one_wire;
 
-    void send_command(const char command[8]);
+    void send_command(uint8_t command);
 
 public:
     Rom rom;

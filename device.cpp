@@ -29,20 +29,20 @@ bool Device::presence_pulse() {
     return true;
 }
 
-void Device::send_command(const char command[8]) {
-    for (int i = 7; i >= 0; i--) {
-        bool bit = command[i] == '1';
+void Device::send_command(uint8_t command) {
+    for (int i = 0; i < 8; i++) {
+        bool bit = (command >> i) & 0x01;
         one_wire.write_bit(bit);
         sleep_us(5);
     }
 }
 
 void Device::skip_rom() {
-    send_command("11001100");
+    send_command(0xCC);
 }
 
 void Device::read_rom() {
-    send_command("00110011");
+    send_command(0x33);
 
     rom.family_code = 0;
     for (int i = 0; i < 6; i++) {
@@ -72,7 +72,7 @@ void Device::read_rom() {
 }
 
 void Device::match_rom() {
-    send_command("01010101");
+    send_command(0x55);
 
     // Send family code
     for (int i = 0; i < 8; i++) {
@@ -99,7 +99,7 @@ void Device::match_rom() {
 }
 
 void Device::convert_t() {
-    send_command("01000100");
+    send_command(0x44);
 
     bool detected = false;
     uint32_t start_time = to_ms_since_boot(get_absolute_time());
