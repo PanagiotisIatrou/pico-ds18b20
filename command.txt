@@ -5,3 +5,4 @@ run bat from GUI
 read rom: 33h - 00110011
 match rom: 55h - 01010101
 convert t: 44h: 01000100
+skip rom: cch: 11001100

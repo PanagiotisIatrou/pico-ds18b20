@@ -1,5 +1,6 @@
 #include "device.hpp"
 
+#include <stdio.h>
 #include <cstring>
 #include "pico/stdlib.h"
 
@@ -34,6 +35,10 @@ void Device::send_command(const char command[8]) {
         one_wire.write_bit(bit);
         sleep_us(5);
     }
+}
+
+void Device::skip_rom() {
+    send_command("11001100");
 }
 
 void Device::read_rom() {
