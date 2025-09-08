@@ -17,8 +17,8 @@ OneWireState OneWire::get_state() {
     return state;
 }
 
-void OneWire::get_pin_value() {
-    gpio_get(data_pin);
+bool OneWire::get_pin_value() {
+    return gpio_get(data_pin);
 }
 
 void OneWire::set_pin_value(bool value) {

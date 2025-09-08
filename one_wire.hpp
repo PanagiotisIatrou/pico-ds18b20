@@ -14,7 +14,7 @@ public:
 
     OneWireState get_state();
 
-    void get_pin_value();
+    bool get_pin_value();
 
     void set_pin_value(bool value);
 
