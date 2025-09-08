@@ -6,11 +6,11 @@
 class Device {
 private:
     OneWire& one_wire;
-    Rom rom;
 
     void send_command(const char command[8]);
 
 public:
+    Rom rom;
 
     Device(OneWire& one_wire);
 

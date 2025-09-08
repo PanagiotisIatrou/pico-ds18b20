@@ -24,7 +24,13 @@ int main()
         printf("Did not detect presence pulse\n");
         return 0;
     }
-    device.skip_rom();
+    device.read_rom();
+
+    if (!device.presence_pulse()) {
+        printf("Did not detect presence pulse\n");
+        return 0;
+    }
+    device.match_rom();
     device.convert_t();
 
     fflush(stdout);

@@ -44,21 +44,29 @@ void Device::skip_rom() {
 void Device::read_rom() {
     send_command("00110011");
 
+    rom.family_code = 0;
+    for (int i = 0; i < 6; i++) {
+        rom.serial_number[i] = 0;
+    }
+    rom.crc_code = 0;
+
     // Receive family code
-    for (int i = 7; i >= 0; i--) {
-        rom.family_code[i] = one_wire.read_bit() ? '1' : '0';
+    for (int i = 0; i < 8; i++) {
+        rom.family_code |= (one_wire.read_bit() << i);
         sleep_us(5);
     }
 
     // Receive family code
-    for (int i = 47; i >= 0; i--) {
-        rom.serial_number[i] = one_wire.read_bit() ? '1' : '0';
-        sleep_us(5);
+    for (int k = 5; k >= 0; k--) {
+        for (int i = 0; i < 8; i++) {
+            rom.serial_number[k] |= (one_wire.read_bit() << i);
+            sleep_us(5);
+        }
     }
 
     // Receive CRC code
-    for (int i = 7; i >= 0; i--) {
-        rom.crc_code[i] = one_wire.read_bit() ? '1' : '0';
+    for (int i = 0; i < 8; i++) {
+        rom.crc_code |= (one_wire.read_bit() << i);
         sleep_us(5);
     }
 }
@@ -67,20 +75,25 @@ void Device::match_rom() {
     send_command("01010101");
 
     // Send family code
-    for (int i = 7; i >= 0; i--) {
-        one_wire.write_bit(rom.family_code[i]);
+    for (int i = 0; i < 8; i++) {
+        bool bit = (rom.family_code >> i) & 0x01;
+        one_wire.write_bit(bit);
         sleep_us(5);
     }
 
     // Send serial number
-    for (int i = 47; i >= 0; i--) {
-        one_wire.write_bit(rom.serial_number[i]);
-        sleep_us(5);
+    for (int k = 5; k >= 0; k--) {
+        for (int i = 0; i < 8; i++) {
+            bool bit = (rom.serial_number[k] >> i) & 0x01;
+            one_wire.write_bit(bit);
+            sleep_us(5);
+        }
     }
 
     // Send CRC code
-    for (int i = 7; i >= 0; i--) {
-        one_wire.write_bit(rom.crc_code[i]);
+    for (int i = 0; i < 8; i++) {
+        bool bit = (rom.crc_code >> i) & 0x01;
+        one_wire.write_bit(bit);
         sleep_us(5);
     }
 }

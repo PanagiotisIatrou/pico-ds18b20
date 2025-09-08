@@ -1,7 +1,9 @@
 #pragma once
 
+#include <stdint.h>
+
 struct Rom {
-    char family_code[8];
-    char serial_number[48];
-    char crc_code[8];
+    uint8_t family_code;
+    uint8_t serial_number[6];
+    uint8_t crc_code;
 };
