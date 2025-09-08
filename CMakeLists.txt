@@ -35,7 +35,7 @@ pico_sdk_init()
 
 # Add executable. Default name is the project name, version 0.1
 
-add_executable(ds18b20 ds18b20.cpp one_wire.cpp device.cpp)
+add_executable(ds18b20 src/ds18b20.cpp src/one_wire.cpp src/device.cpp)
 
 pico_set_program_name(ds18b20 "ds18b20")
 pico_set_program_version(ds18b20 "0.1")
@@ -50,7 +50,7 @@ target_link_libraries(ds18b20
 
 # Add the standard include files to the build
 target_include_directories(ds18b20 PRIVATE
-        ${CMAKE_CURRENT_LIST_DIR}
+        ${CMAKE_CURRENT_LIST_DIR}/src
 )
 
 pico_add_extra_outputs(ds18b20)
