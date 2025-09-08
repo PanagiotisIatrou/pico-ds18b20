@@ -24,9 +24,8 @@ int main()
         printf("Did not detect presence pulse\n");
         return 0;
     }
-
-    // Send read ROM command
-    device.read_rom();
+    device.skip_rom();
+    device.convert_t();
 
     fflush(stdout);
     sleep_ms(1000);

@@ -84,3 +84,23 @@ void Device::match_rom() {
         sleep_us(5);
     }
 }
+
+void Device::convert_t() {
+    send_command("01000100");
+
+    bool detected = false;
+    uint32_t start_time = to_ms_since_boot(get_absolute_time());
+    while (to_ms_since_boot(get_absolute_time()) - start_time < 1000) {
+        bool value = one_wire.read_bit();
+        if (value) {
+            detected = true;
+            break;
+        }
+        sleep_ms(5);
+    }
+    if (detected) {
+        printf("Finished temp %d\n", to_ms_since_boot(get_absolute_time()) - start_time);
+    } else {
+        printf(":( No temp\n");
+    }
+}

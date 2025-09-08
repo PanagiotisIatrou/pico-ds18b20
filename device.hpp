@@ -21,4 +21,6 @@ public:
     void read_rom();
 
     void match_rom();
+
+    void convert_t();
 };
