@@ -36,6 +36,8 @@ private:
 
     void write_scratchpad(int8_t temperature_high, int8_t temperature_low, uint8_t configuration);
 
+    bool copy_scratchpad();
+
 public:
     Device(OneWire& one_wire);
 

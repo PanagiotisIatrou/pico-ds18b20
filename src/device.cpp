@@ -130,6 +130,21 @@ void Device::write_scratchpad(int8_t temperature_high, int8_t temperature_low, u
     m_one_wire.write_byte(configuration);
 }
 
+bool Device::copy_scratchpad() {
+    m_one_wire.write_byte(0x48);
+
+    uint32_t start_time = to_ms_since_boot(get_absolute_time());
+    while (to_ms_since_boot(get_absolute_time()) - start_time < 1000) {
+        bool value = m_one_wire.read_bit();
+        if (value) {
+            return true;
+        }
+        sleep_ms(1);
+    }
+
+    return false;
+}
+
 float Device::measure_temperature() {
     // Request a temperature measurement
     if (!presence_pulse()) {
