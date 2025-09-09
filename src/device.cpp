@@ -166,7 +166,7 @@ float Device::measure_temperature() {
     return extract_temperature_from_scratchpad();
 }
 
-void Device::set_resolution(Resolution resolution) {
+void Device::set_resolution(Resolution resolution, bool save) {
     // Write the new resolution to the scratchpad
     if (!presence_pulse()) {
         printf("Did not detect presence pulse\n");
@@ -174,4 +174,15 @@ void Device::set_resolution(Resolution resolution) {
     match_rom();
     m_scratchpad.configuration = 0b00011111 | ((uint8_t)resolution << 5);
     write_scratchpad(m_scratchpad.temperature_high, m_scratchpad.temperature_low, m_scratchpad.configuration);
+
+    // Save the resolution if specified
+    if (save) {
+        if (!presence_pulse()) {
+            printf("Did not detect presence pulse\n");
+        }
+        match_rom();
+        if (!copy_scratchpad()) {
+            printf("Could not save resolution\n");
+        }
+    }
 }

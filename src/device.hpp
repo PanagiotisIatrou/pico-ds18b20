@@ -45,5 +45,5 @@ public:
 
     float measure_temperature();
 
-    void set_resolution(Resolution resolution);
+    void set_resolution(Resolution resolution, bool save);
 };
