@@ -33,6 +33,13 @@ int main()
     device.match_rom();
     device.convert_t();
 
+    if (!device.presence_pulse()) {
+        printf("Did not detect presence pulse\n");
+        return 0;
+    }
+    device.match_rom();
+    device.read_scratchpad();
+
     fflush(stdout);
     sleep_ms(1000);
     return 0;

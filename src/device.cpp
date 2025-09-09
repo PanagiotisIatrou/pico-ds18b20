@@ -76,9 +76,19 @@ void Device::convert_t() {
         }
         sleep_ms(5);
     }
-    if (detected) {
-        printf("Finished temp %d\n", to_ms_since_boot(get_absolute_time()) - start_time);
-    } else {
-        printf(":( No temp\n");
+}
+
+void Device::read_scratchpad() {
+    one_wire.write_byte(0xBE);
+
+    for (int i = 0; i < 2; i++) {
+        scratchpad.temperature[i] = one_wire.read_byte();
     }
+    scratchpad.temperature_high = one_wire.read_byte();
+    scratchpad.temperature_low = one_wire.read_byte();
+    scratchpad.configuration = one_wire.read_byte();
+    for (int i = 0; i < 3; i++) {
+        scratchpad.reserved[i] = one_wire.read_byte();
+    }
+    scratchpad.crc_code = one_wire.read_byte();
 }
