@@ -10,6 +10,13 @@ Device::Device(OneWire& one_wire) : m_one_wire(one_wire) {
         printf("Did not detect presence pulse\n");
     }
     read_rom();
+
+    // Read the scratchpad to obtain the initial settings
+    if (!presence_pulse()) {
+        printf("Did not detect presence pulse\n");
+    }
+    match_rom();
+    read_scratchpad();
 }
 
 uint8_t Device::get_config_setting() {
