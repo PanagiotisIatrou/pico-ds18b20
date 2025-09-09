@@ -45,6 +45,8 @@ private:
 public:
     Device(OneWire& one_wire);
 
+    bool ping();
+
     bool is_valid();
 
     uint8_t get_resolution();

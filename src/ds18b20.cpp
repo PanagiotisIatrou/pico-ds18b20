@@ -27,7 +27,15 @@ int main()
     device.set_resolution(Resolution::VeryHigh, true);
     while (true) {
         float temperature = device.measure_temperature();
-        printf("%f\n", temperature);
+        if (temperature == -1000.0) {
+            printf("Lost device\n");
+            while (!device.ping()) {
+                sleep_ms(500);
+            }
+            printf("Found again\n");
+        } else {
+            printf("%f\n", temperature);
+        }
     }
 
     fflush(stdout);

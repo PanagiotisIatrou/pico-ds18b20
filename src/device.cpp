@@ -49,6 +49,32 @@ uint8_t Device::get_config_setting() {
     return (m_scratchpad.configuration & 0b01100000) >> 5;
 }
 
+bool Device::ping() {
+    Rom old_rom = m_rom;
+
+    bool ok = false;
+    for (int t = 0; t < m_max_tries; t++) {
+        if (!presence_pulse()) {
+            continue;
+        }
+        if (!read_rom()) {
+            continue;
+        }
+
+        ok = true;
+        break;
+    }
+
+    if (ok && m_rom == old_rom) {
+        m_is_valid = true;
+        return true;
+    }
+
+    m_rom = old_rom;
+    m_is_valid = false;
+    return false;
+}
+
 bool Device::is_valid() {
     return m_is_valid;
 }
