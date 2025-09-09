@@ -150,3 +150,13 @@ float Device::measure_temperature() {
     // Extract the temperature from the scratchpad
     return extract_temperature_from_scratchpad();
 }
+
+void Device::set_resolution(Resolution resolution) {
+    // Write the new resolution to the scratchpad
+    if (!presence_pulse()) {
+        printf("Did not detect presence pulse\n");
+    }
+    match_rom();
+    m_scratchpad.configuration = 0b00011111 | ((uint8_t)resolution << 5);
+    write_scratchpad(m_scratchpad.temperature_high, m_scratchpad.temperature_low, m_scratchpad.configuration);
+}

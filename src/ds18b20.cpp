@@ -20,8 +20,11 @@ int main()
     OneWire one_wire(data_pin);
     Device device(one_wire);
 
-    float temperature = device.measure_temperature();
-    printf("%f\n", temperature);
+    device.set_resolution(Resolution::Low);
+    while (true) {
+        float temperature = device.measure_temperature();
+        printf("%f\n", temperature);
+    }
 
     fflush(stdout);
     sleep_ms(1000);
