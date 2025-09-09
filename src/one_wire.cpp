@@ -84,3 +84,16 @@ bool OneWire::wait_us_for_bit(bool bit, int max_time_us) {
 bool OneWire::wait_ms_for_bit(bool bit, int max_time_ms) {
     return wait_us_for_bit(bit, max_time_ms * 1000);
 }
+
+uint8_t OneWire::calculate_crc_byte(uint8_t crc, uint8_t byte) {
+    crc ^= byte;
+    for (int i = 0; i < 8; i++) {
+        if (crc & 0x01) {
+            crc = (crc >> 1) ^ 0x8C;
+        } else {
+            crc >>= 1;
+        }
+    }
+
+    return crc;
+}

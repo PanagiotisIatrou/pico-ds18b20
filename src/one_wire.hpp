@@ -31,4 +31,6 @@ public:
     bool wait_us_for_bit(bool bit, int max_time_us);
 
     bool wait_ms_for_bit(bool bit, int max_time_ms);
+
+    static uint8_t calculate_crc_byte(uint8_t crc, uint8_t byte);
 };
