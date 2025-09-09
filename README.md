@@ -1,5 +1,5 @@
 # pico-ds18b20
-Raspberry Pi Pico library for the ds18b20 temperature sensor
+Raspberry Pi Pico C++ library for the ds18b20 temperature sensor
 
 ## How to connect
 **Note:** Does not support parasite power mode  
@@ -72,3 +72,7 @@ For example:
   - High: 0.25°C steps
   - Very High: 0.5°C steps
 - Save resolution for retention after power cycle
+
+## Resources
+
+- [ds18b20 Analog datasheet](https://www.analog.com/media/en/technical-documentation/data-sheets/ds18b20.pdf)
