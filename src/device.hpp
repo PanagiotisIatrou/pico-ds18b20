@@ -18,16 +18,19 @@ private:
 
     bool presence_pulse();
 
+    // ROM commands
+
     void skip_rom();
 
     void read_rom();
 
     void match_rom();
 
+    // Function commands
+
     bool convert_t();
 
     void read_scratchpad();
-
 
 public:
     Device(OneWire& one_wire);
