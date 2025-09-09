@@ -4,7 +4,13 @@
 #include <cstring>
 #include "pico/stdlib.h"
 
-Device::Device(OneWire& one_wire) : m_one_wire(one_wire) { }
+Device::Device(OneWire& one_wire) : m_one_wire(one_wire) {
+    // Read the rom of the device
+    if (!presence_pulse()) {
+        printf("Did not detect presence pulse\n");
+    }
+    read_rom();
+}
 
 bool Device::presence_pulse() {
     // Write 0 to initialize connection
@@ -91,4 +97,30 @@ void Device::read_scratchpad() {
         m_scratchpad.reserved[i] = m_one_wire.read_byte();
     }
     m_scratchpad.crc_code = m_one_wire.read_byte();
+}
+
+float Device::measure_temperature() {
+    // Request a temperature measurement
+    if (!presence_pulse()) {
+        printf("Did not detect presence pulse\n");
+        return 0;
+    }
+    match_rom();
+    convert_t();
+
+    // Read the scratchpad
+    if (!presence_pulse()) {
+        printf("Did not detect presence pulse\n");
+        return 0;
+    }
+    match_rom();
+    read_scratchpad();
+
+    // Extract the temperature from the scratchpad
+    uint8_t config_setting = (m_scratchpad.configuration & 0b01100000) >> 5;
+    uint8_t resolution = 9 + config_setting;
+    int16_t temperature_data = m_scratchpad.temperature[0] + (m_scratchpad.temperature[1] << 8);
+    temperature_data = temperature_data >> (3 - config_setting);
+    float temperature = temperature_data / (float)(1 << (config_setting + 1));
+    return temperature;
 }

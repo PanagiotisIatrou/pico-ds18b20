@@ -20,25 +20,8 @@ int main()
     OneWire one_wire(data_pin);
     Device device(one_wire);
 
-    if (!device.presence_pulse()) {
-        printf("Did not detect presence pulse\n");
-        return 0;
-    }
-    device.read_rom();
-
-    if (!device.presence_pulse()) {
-        printf("Did not detect presence pulse\n");
-        return 0;
-    }
-    device.match_rom();
-    device.convert_t();
-
-    if (!device.presence_pulse()) {
-        printf("Did not detect presence pulse\n");
-        return 0;
-    }
-    device.match_rom();
-    device.read_scratchpad();
+    float temperature = device.measure_temperature();
+    printf("%f\n", temperature);
 
     fflush(stdout);
     sleep_ms(1000);

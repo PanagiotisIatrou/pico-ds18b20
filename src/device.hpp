@@ -12,10 +12,6 @@ private:
 
     Scratchpad m_scratchpad;
 
-public:
-
-    Device(OneWire& one_wire);
-
     bool presence_pulse();
 
     void skip_rom();
@@ -27,4 +23,9 @@ public:
     bool convert_t();
 
     void read_scratchpad();
+
+public:
+    Device(OneWire& one_wire);
+
+    float measure_temperature();
 };
