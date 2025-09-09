@@ -6,8 +6,8 @@ enum OneWireState { READ, WRITE };
 
 class OneWire {
 private:
-    int data_pin;
-    OneWireState state;
+    int m_data_pin;
+    OneWireState m_state;
 
 public:
     OneWire(int data_pin);

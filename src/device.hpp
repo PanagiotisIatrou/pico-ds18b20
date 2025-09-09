@@ -6,11 +6,11 @@
 
 class Device {
 private:
-    OneWire& one_wire;
+    OneWire& m_one_wire;
 
-    Rom rom;
+    Rom m_rom;
 
-    Scratchpad scratchpad;
+    Scratchpad m_scratchpad;
 
 public:
 
