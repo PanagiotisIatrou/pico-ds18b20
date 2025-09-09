@@ -36,6 +36,29 @@ Connect:
 - GND: Connect to ground (any GND pin)
 - DQ: Connect to any GPIO pin
 
+<table>
+  <tbody>
+    <tr>
+      <td>
+        <figure>
+          <p align="center" width="300px">
+            <img src="images/connection_without.png" width="300px">
+            <figcaption><p align="center">Without built-in pull-up resistor</p></figcaption>
+          </p>
+        </figure>
+      </td>
+      <td>
+        <figure>
+          <p align="center" width="300px">
+            <img src="images/connection_with.png" width="300px">
+            <figcaption><p align="center">With built-in pull-up resistor</p></figcaption>
+          </p>
+        </figure>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
 ## Features
 - Measure temperature
   - &plusmn;0.5°C from -10°C to +85°C
