@@ -7,10 +7,9 @@ class Device {
 private:
     OneWire& one_wire;
 
-    void send_command(uint8_t command);
+    Rom rom;
 
 public:
-    Rom rom;
 
     Device(OneWire& one_wire);
 

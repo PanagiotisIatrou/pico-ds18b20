@@ -29,77 +29,42 @@ bool Device::presence_pulse() {
     return true;
 }
 
-void Device::send_command(uint8_t command) {
-    for (int i = 0; i < 8; i++) {
-        bool bit = (command >> i) & 0x01;
-        one_wire.write_bit(bit);
-        sleep_us(5);
-    }
-}
-
 void Device::skip_rom() {
-    send_command(0xCC);
+    one_wire.write_byte(0xCC);
 }
 
 void Device::read_rom() {
-    send_command(0x33);
-
-    rom.family_code = 0;
-    for (int i = 0; i < 6; i++) {
-        rom.serial_number[i] = 0;
-    }
-    rom.crc_code = 0;
+    one_wire.write_byte(0x33);
 
     // Receive family code
-    for (int i = 0; i < 8; i++) {
-        rom.family_code |= (one_wire.read_bit() << i);
-        sleep_us(5);
-    }
+    rom.family_code = one_wire.read_byte();
 
     // Receive family code
     for (int k = 5; k >= 0; k--) {
-        for (int i = 0; i < 8; i++) {
-            rom.serial_number[k] |= (one_wire.read_bit() << i);
-            sleep_us(5);
-        }
+        rom.serial_number[k] = one_wire.read_byte();
     }
 
     // Receive CRC code
-    for (int i = 0; i < 8; i++) {
-        rom.crc_code |= (one_wire.read_bit() << i);
-        sleep_us(5);
-    }
+    rom.crc_code = one_wire.read_byte();
 }
 
 void Device::match_rom() {
-    send_command(0x55);
+    one_wire.write_byte(0x55);
 
     // Send family code
-    for (int i = 0; i < 8; i++) {
-        bool bit = (rom.family_code >> i) & 0x01;
-        one_wire.write_bit(bit);
-        sleep_us(5);
-    }
+    one_wire.write_byte(rom.family_code);
 
     // Send serial number
     for (int k = 5; k >= 0; k--) {
-        for (int i = 0; i < 8; i++) {
-            bool bit = (rom.serial_number[k] >> i) & 0x01;
-            one_wire.write_bit(bit);
-            sleep_us(5);
-        }
+        one_wire.write_byte(rom.serial_number[k]);
     }
 
     // Send CRC code
-    for (int i = 0; i < 8; i++) {
-        bool bit = (rom.crc_code >> i) & 0x01;
-        one_wire.write_bit(bit);
-        sleep_us(5);
-    }
+    one_wire.write_byte(rom.crc_code);
 }
 
 void Device::convert_t() {
-    send_command(0x44);
+    one_wire.write_byte(0x44);
 
     bool detected = false;
     uint32_t start_time = to_ms_since_boot(get_absolute_time());

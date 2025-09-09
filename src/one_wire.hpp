@@ -1,5 +1,7 @@
 #pragma once
 
+#include <stdint.h>
+
 enum OneWireState { READ, WRITE };
 
 class OneWire {
@@ -21,6 +23,10 @@ public:
     void write_bit(bool value);
 
     bool read_bit();
+
+    void write_byte(uint8_t value);
+
+    uint8_t read_byte();
 
     bool wait_us_for_bit(bool bit, int max_time_us);
 

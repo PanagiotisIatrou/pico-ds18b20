@@ -50,6 +50,24 @@ bool OneWire::read_bit() {
     return data;
 }
 
+void OneWire::write_byte(uint8_t value) {
+    for (int i = 0; i < 8; i++) {
+        bool bit = (value >> i) & 0x01;
+        write_bit(bit);
+        sleep_us(5);
+    }
+}
+
+uint8_t OneWire::read_byte() {
+    uint8_t byte = 0;
+    for (int i = 0; i < 8; i++) {
+        byte |= (read_bit() << i);
+        sleep_us(5);
+    }
+
+    return byte;
+}
+
 bool OneWire::wait_us_for_bit(bool bit, int max_time_us) {
     uint32_t start_time = to_us_since_boot(get_absolute_time());
     while (to_us_since_boot(get_absolute_time()) - start_time < max_time_us) {
