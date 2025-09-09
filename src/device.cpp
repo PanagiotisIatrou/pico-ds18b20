@@ -12,6 +12,22 @@ Device::Device(OneWire& one_wire) : m_one_wire(one_wire) {
     read_rom();
 }
 
+uint8_t Device::get_config_setting() {
+    return (m_scratchpad.configuration & 0b01100000) >> 5;
+}
+
+uint8_t Device::get_resolution() {
+    return 9 + get_config_setting();
+}
+
+float Device::extract_temperature_from_scratchpad() {
+    uint8_t config_setting = get_config_setting();
+    int16_t temperature_data = m_scratchpad.temperature[0] + (m_scratchpad.temperature[1] << 8);
+    temperature_data = temperature_data >> (3 - config_setting);
+    float temperature = temperature_data / (float)(1 << (config_setting + 1));
+    return temperature;
+}
+
 bool Device::presence_pulse() {
     // Write 0 to initialize connection
     m_one_wire.set_state(OneWireState::WRITE);
@@ -117,10 +133,5 @@ float Device::measure_temperature() {
     read_scratchpad();
 
     // Extract the temperature from the scratchpad
-    uint8_t config_setting = (m_scratchpad.configuration & 0b01100000) >> 5;
-    uint8_t resolution = 9 + config_setting;
-    int16_t temperature_data = m_scratchpad.temperature[0] + (m_scratchpad.temperature[1] << 8);
-    temperature_data = temperature_data >> (3 - config_setting);
-    float temperature = temperature_data / (float)(1 << (config_setting + 1));
-    return temperature;
+    return extract_temperature_from_scratchpad();
 }
