@@ -9,8 +9,7 @@ Device::Device(OneWire& one_wire) : m_one_wire(one_wire) {
     bool ok = false;
     for (int t = 0; t < m_max_tries; t++) {
         if (!presence_pulse()) {
-            m_is_valid = false;
-            return;
+            continue;
         }
         if (!read_rom()) {
             continue;
@@ -71,30 +70,26 @@ float Device::extract_temperature_from_scratchpad() {
 }
 
 bool Device::presence_pulse() {
-    for (int t = 0; t < m_max_tries; t++) {
-        // Write 0 to initialize connection
-        m_one_wire.set_state(OneWireState::WRITE);
-        m_one_wire.set_pin_value(0);
-        sleep_us(500);
+    // Write 0 to initialize connection
+    m_one_wire.set_state(OneWireState::WRITE);
+    m_one_wire.set_pin_value(0);
+    sleep_us(500);
 
-        // Wait for presence pulse
-        m_one_wire.set_state(OneWireState::READ);
-        sleep_us(5);
-        bool detected_presence_pulse = m_one_wire.wait_us_for_bit(0, 240 + 55);
-        if (!detected_presence_pulse) {
-            continue;
-        }
-
-        // Wait for presence pulse to end
-        bool detected_presence_pulse_end = m_one_wire.wait_us_for_bit(1, 240);
-        if (!detected_presence_pulse_end) {
-            continue;
-        }
-
-        return true;
+    // Wait for presence pulse
+    m_one_wire.set_state(OneWireState::READ);
+    sleep_us(5);
+    bool detected_presence_pulse = m_one_wire.wait_us_for_bit(0, 240 + 55);
+    if (!detected_presence_pulse) {
+        return false;
     }
-    
-    return false;
+
+    // Wait for presence pulse to end
+    bool detected_presence_pulse_end = m_one_wire.wait_us_for_bit(1, 240);
+    if (!detected_presence_pulse_end) {
+        return false;
+    }
+
+    return true;
 }
 
 void Device::skip_rom() {
@@ -220,15 +215,26 @@ float Device::measure_temperature() {
     }
 
     // Request a temperature measurement
-    if (!presence_pulse()) {
+    bool ok = false;
+    for (int t = 0; t < m_max_tries; t++) {
+        if (!presence_pulse()) {
+            continue;
+        }
+        match_rom();
+        if (!convert_t()) {
+            continue;
+        }
+
+        ok = true;
+        break;
+    }
+    if (!ok) {
         m_is_valid = false;
         return -1000.0;
     }
-    match_rom();
-    convert_t();
 
     // Read the scratchpad
-    bool ok = false;
+    ok = false;
     for (int t = 0; t < m_max_tries; t++) {
         if (!presence_pulse()) {
             continue;
@@ -256,23 +262,41 @@ void Device::set_resolution(Resolution resolution, bool save) {
     }
 
     // Write the new resolution to the scratchpad
-    if (!presence_pulse()) {
+    bool ok = false;
+    for (int t = 0; t < m_max_tries; t++) {
+        if (!presence_pulse()) {
+            continue;
+        }
+        match_rom();
+        m_scratchpad.configuration = 0b00011111 | ((uint8_t)resolution << 5);
+        write_scratchpad(m_scratchpad.temperature_high, m_scratchpad.temperature_low, m_scratchpad.configuration);
+    
+        ok = true;
+        break;
+    }
+    if (!ok) {
         m_is_valid = false;
         return;
     }
-    match_rom();
-    m_scratchpad.configuration = 0b00011111 | ((uint8_t)resolution << 5);
-    write_scratchpad(m_scratchpad.temperature_high, m_scratchpad.temperature_low, m_scratchpad.configuration);
 
     // Save the resolution if specified
     if (save) {
-        if (!presence_pulse()) {
+        bool ok = false;
+        for (int t = 0; t < m_max_tries; t++) {
+            if (!presence_pulse()) {
+                continue;
+            }
+            match_rom();
+            if (!copy_scratchpad()) {
+                continue;
+            }
+
+            ok = true;
+            break;
+        }
+        if (!ok) {
             m_is_valid = false;
             return;
-        }
-        match_rom();
-        if (!copy_scratchpad()) {
-            printf("Could not save resolution\n");
         }
     }
 }
