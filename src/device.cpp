@@ -63,19 +63,19 @@ void Device::match_rom() {
     one_wire.write_byte(rom.crc_code);
 }
 
-void Device::convert_t() {
+bool Device::convert_t() {
     one_wire.write_byte(0x44);
 
-    bool detected = false;
     uint32_t start_time = to_ms_since_boot(get_absolute_time());
     while (to_ms_since_boot(get_absolute_time()) - start_time < 1000) {
         bool value = one_wire.read_bit();
         if (value) {
-            detected = true;
-            break;
+            return true;
         }
         sleep_ms(5);
     }
+
+    return false;
 }
 
 void Device::read_scratchpad() {

@@ -24,7 +24,7 @@ public:
 
     void match_rom();
 
-    void convert_t();
+    bool convert_t();
 
     void read_scratchpad();
 };
