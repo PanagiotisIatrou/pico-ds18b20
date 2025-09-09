@@ -36,6 +36,8 @@ Connect:
 - GND: Connect to ground (any GND pin)
 - DQ: Connect to any GPIO pin
 
+For example
+
 <table>
   <tbody>
     <tr>
