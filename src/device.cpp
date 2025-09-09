@@ -122,6 +122,14 @@ void Device::read_scratchpad() {
     m_scratchpad.crc_code = m_one_wire.read_byte();
 }
 
+void Device::write_scratchpad(uint8_t temperature_high, uint8_t temperature_low, uint8_t configuration) {
+    m_one_wire.write_byte(0x4E);
+
+    m_one_wire.write_byte(temperature_high);
+    m_one_wire.write_byte(temperature_low);
+    m_one_wire.write_byte(configuration);
+}
+
 float Device::measure_temperature() {
     // Request a temperature measurement
     if (!presence_pulse()) {
