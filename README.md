@@ -4,7 +4,7 @@ Raspberry Pi Pico library for the ds18b20 temperature sensor
 ## Connection
 **Note:** Does not support parasite power mode  
 
-You first need to determine whether or not your ds18b20 has a built-in pull-up resistor. ds18b20's with built-in pull-up resistors usually have a small piece connected at the 3 wires (ex. Keystudio ds18b20).
+You first need to determine whether your ds18b20 has a built-in pull-up resistor or not. ds18b20's with built-in pull-up resistors usually have a small component connected across all three wires (ex. Keystudio ds18b20).
 
 <table>
   <tbody>
@@ -32,9 +32,9 @@ You first need to determine whether or not your ds18b20 has a built-in pull-up r
 In case your ds18b20 doesn't have a built-in pull-up resistor, you need to connect one $4.7k\Omega$ yourself.
 
 Connect:
-- VDD: Connect to 5V (ex. VBUS pin) or 3.3V (ex. 3V3 pin)
-- GND: Connect to ground (any GND pin)
-- DQ: Connect to any GPIO pin
+- VDD: to 5V (ex. VBUS pin) or 3.3V (ex. 3V3 pin)
+- GND: to ground (any GND pin)
+- DQ: to any GPIO pin
 
 For example:
 
