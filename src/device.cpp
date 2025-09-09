@@ -122,7 +122,7 @@ void Device::read_scratchpad() {
     m_scratchpad.crc_code = m_one_wire.read_byte();
 }
 
-void Device::write_scratchpad(uint8_t temperature_high, uint8_t temperature_low, uint8_t configuration) {
+void Device::write_scratchpad(int8_t temperature_high, int8_t temperature_low, uint8_t configuration) {
     m_one_wire.write_byte(0x4E);
 
     m_one_wire.write_byte(temperature_high);
