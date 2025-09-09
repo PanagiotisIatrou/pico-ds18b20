@@ -14,6 +14,10 @@ private:
 
     Scratchpad m_scratchpad;
 
+    bool m_is_valid;
+
+    const int m_max_tries = 10;
+
     uint8_t get_config_setting();
 
     float extract_temperature_from_scratchpad();
@@ -24,7 +28,7 @@ private:
 
     void skip_rom();
 
-    void read_rom();
+    bool read_rom();
 
     void match_rom();
 
@@ -32,7 +36,7 @@ private:
 
     bool convert_t();
 
-    void read_scratchpad();
+    bool read_scratchpad();
 
     void write_scratchpad(int8_t temperature_high, int8_t temperature_low, uint8_t configuration);
 
@@ -40,6 +44,8 @@ private:
 
 public:
     Device(OneWire& one_wire);
+
+    bool is_valid();
 
     uint8_t get_resolution();
 

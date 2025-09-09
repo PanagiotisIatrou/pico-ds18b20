@@ -5,25 +5,60 @@
 #include "pico/stdlib.h"
 
 Device::Device(OneWire& one_wire) : m_one_wire(one_wire) {
-    // Read the rom of the device
-    if (!presence_pulse()) {
-        printf("Did not detect presence pulse\n");
-    }
-    read_rom();
+    // Read the ROM of the device
+    bool ok = false;
+    for (int t = 0; t < m_max_tries; t++) {
+        if (!presence_pulse()) {
+            m_is_valid = false;
+            return;
+        }
+        if (!read_rom()) {
+            continue;
+        }
 
-    // Read the scratchpad to obtain the initial settings
-    if (!presence_pulse()) {
-        printf("Did not detect presence pulse\n");
+        ok = true;
+        break;
     }
-    match_rom();
-    read_scratchpad();
+    if (!ok) {
+        m_is_valid = false;
+        return;
+    }
+
+    // Read the scratchpad
+    ok = false;
+    for (int t = 0; t < m_max_tries; t++) {
+        if (!presence_pulse()) {
+            continue;
+        }
+        match_rom();
+        if (!read_scratchpad()) {
+            continue;
+        }
+
+        ok = true;
+        break;
+    }
+    if (!ok) {
+        m_is_valid = false;
+        return;
+    }
+
+    m_is_valid = true;
 }
 
 uint8_t Device::get_config_setting() {
     return (m_scratchpad.configuration & 0b01100000) >> 5;
 }
 
+bool Device::is_valid() {
+    return m_is_valid;
+}
+
 uint8_t Device::get_resolution() {
+    if (!m_is_valid) {
+        return 0;
+    }
+
     return 9 + get_config_setting();
 }
 
@@ -36,33 +71,37 @@ float Device::extract_temperature_from_scratchpad() {
 }
 
 bool Device::presence_pulse() {
-    // Write 0 to initialize connection
-    m_one_wire.set_state(OneWireState::WRITE);
-    m_one_wire.set_pin_value(0);
-    sleep_us(500);
+    for (int t = 0; t < m_max_tries; t++) {
+        // Write 0 to initialize connection
+        m_one_wire.set_state(OneWireState::WRITE);
+        m_one_wire.set_pin_value(0);
+        sleep_us(500);
 
-    // Wait for presence pulse
-    m_one_wire.set_state(OneWireState::READ);
-    sleep_us(5);
-    bool detected_presence_pulse = m_one_wire.wait_us_for_bit(0, 240 + 55);
-    if (!detected_presence_pulse) {
-        return false;
+        // Wait for presence pulse
+        m_one_wire.set_state(OneWireState::READ);
+        sleep_us(5);
+        bool detected_presence_pulse = m_one_wire.wait_us_for_bit(0, 240 + 55);
+        if (!detected_presence_pulse) {
+            continue;
+        }
+
+        // Wait for presence pulse to end
+        bool detected_presence_pulse_end = m_one_wire.wait_us_for_bit(1, 240);
+        if (!detected_presence_pulse_end) {
+            continue;
+        }
+
+        return true;
     }
-
-    // Wait for presence pulse to end
-    bool detected_presence_pulse_end = m_one_wire.wait_us_for_bit(1, 240);
-    if (!detected_presence_pulse_end) {
-        return false;
-    }
-
-    return true;
+    
+    return false;
 }
 
 void Device::skip_rom() {
     m_one_wire.write_byte(0xCC);
 }
 
-void Device::read_rom() {
+bool Device::read_rom() {
     m_one_wire.write_byte(0x33);
 
     // Receive family code
@@ -75,6 +114,18 @@ void Device::read_rom() {
 
     // Receive CRC code
     m_rom.crc_code = m_one_wire.read_byte();
+
+    // Check ROM CRC
+    uint8_t crc = 0;
+    crc = OneWire::calculate_crc_byte(crc, m_rom.family_code);
+    for (int i = 5; i >= 0; i--) {
+        crc = OneWire::calculate_crc_byte(crc, m_rom.serial_number[i]);
+    }
+    if (crc != m_rom.crc_code) {
+        return false;
+    }
+
+    return true;
 }
 
 void Device::match_rom() {
@@ -107,9 +158,10 @@ bool Device::convert_t() {
     return false;
 }
 
-void Device::read_scratchpad() {
+bool Device::read_scratchpad() {
     m_one_wire.write_byte(0xBE);
 
+    // Read the scratchpad
     for (int i = 0; i < 2; i++) {
         m_scratchpad.temperature[i] = m_one_wire.read_byte();
     }
@@ -120,6 +172,23 @@ void Device::read_scratchpad() {
         m_scratchpad.reserved[i] = m_one_wire.read_byte();
     }
     m_scratchpad.crc_code = m_one_wire.read_byte();
+
+    // Check Scratchpad CRC
+    uint8_t crc = 0;
+    for (int i = 0; i < 2; i++) {
+        crc = OneWire::calculate_crc_byte(crc, m_scratchpad.temperature[i]);
+    }
+    crc = OneWire::calculate_crc_byte(crc, m_scratchpad.temperature_high);
+    crc = OneWire::calculate_crc_byte(crc, m_scratchpad.temperature_low);
+    crc = OneWire::calculate_crc_byte(crc, m_scratchpad.configuration);
+    for (int i = 0; i < 3; i++) {
+        crc = OneWire::calculate_crc_byte(crc, m_scratchpad.reserved[i]);
+    }
+    if (crc != m_scratchpad.crc_code) {
+        return false;
+    }
+
+    return true;
 }
 
 void Device::write_scratchpad(int8_t temperature_high, int8_t temperature_low, uint8_t configuration) {
@@ -146,30 +215,50 @@ bool Device::copy_scratchpad() {
 }
 
 float Device::measure_temperature() {
+    if (!m_is_valid) {
+        return -1000.0;
+    }
+
     // Request a temperature measurement
     if (!presence_pulse()) {
-        printf("Did not detect presence pulse\n");
-        return 0;
+        m_is_valid = false;
+        return -1000.0;
     }
     match_rom();
     convert_t();
 
     // Read the scratchpad
-    if (!presence_pulse()) {
-        printf("Did not detect presence pulse\n");
-        return 0;
+    bool ok = false;
+    for (int t = 0; t < m_max_tries; t++) {
+        if (!presence_pulse()) {
+            continue;
+        }
+        match_rom();
+        if (!read_scratchpad()) {
+            continue;
+        }
+
+        ok = true;
+        break;
     }
-    match_rom();
-    read_scratchpad();
+    if (!ok) {
+        m_is_valid = false;
+        return -1000.0;
+    }
 
     // Extract the temperature from the scratchpad
     return extract_temperature_from_scratchpad();
 }
 
 void Device::set_resolution(Resolution resolution, bool save) {
+    if (!m_is_valid) {
+        return;
+    }
+
     // Write the new resolution to the scratchpad
     if (!presence_pulse()) {
-        printf("Did not detect presence pulse\n");
+        m_is_valid = false;
+        return;
     }
     match_rom();
     m_scratchpad.configuration = 0b00011111 | ((uint8_t)resolution << 5);
@@ -178,7 +267,8 @@ void Device::set_resolution(Resolution resolution, bool save) {
     // Save the resolution if specified
     if (save) {
         if (!presence_pulse()) {
-            printf("Did not detect presence pulse\n");
+            m_is_valid = false;
+            return;
         }
         match_rom();
         if (!copy_scratchpad()) {

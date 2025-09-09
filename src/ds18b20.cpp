@@ -19,6 +19,10 @@ int main()
     // Initialize a device on the data pin
     OneWire one_wire(data_pin);
     Device device(one_wire);
+    if (!device.is_valid()) {
+        printf("Could not initialize device");
+        return 1;
+    }
 
     device.set_resolution(Resolution::VeryHigh, true);
     while (true) {
