@@ -19,7 +19,7 @@ int main()
 
     // Initialize a device on the data pin
     OneWire one_wire(data_pin);
-    Ds18b20 device(one_wire);
+    Ds18b20 device = Ds18b20::search_rom(one_wire);
     if (!device.is_valid()) {
         printf("Could not initialize device");
         return 1;

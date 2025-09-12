@@ -1,28 +1,14 @@
 #include "ds18b20.hpp"
 
-Ds18b20::Ds18b20(OneWire& one_wire) : device(one_wire) {
-    // Read the ROM of the device
-    bool ok = false;
-    for (int t = 0; t < m_max_tries; t++) {
-        if (!device.presence_pulse()) {
-            continue;
-        }
-        if (!device.read_rom()) {
-            continue;
-        }
+#include <stdio.h>
 
-        ok = true;
-        break;
-    }
-    if (!ok) {
-        m_is_valid = false;
-        return;
-    }
+Ds18b20::Ds18b20(OneWire& one_wire, Rom rom) : m_one_wire(one_wire), device(one_wire, rom) {
+    device.rom = rom;
 
     // Read the scratchpad
-    ok = false;
+    bool ok = false;
     for (int t = 0; t < m_max_tries; t++) {
-        if (!device.presence_pulse()) {
+        if (!m_one_wire.reset()) {
             continue;
         }
         device.match_rom();
@@ -41,12 +27,26 @@ Ds18b20::Ds18b20(OneWire& one_wire) : device(one_wire) {
     m_is_valid = true;
 }
 
+Ds18b20 Ds18b20::search_rom(OneWire& one_wire) {
+    bool ok = false;
+    for (int t = 0; t < m_max_tries; t++) {
+        if (!one_wire.reset()) {
+            continue;
+        }
+
+        ok = true;
+        break;
+    }
+    Rom rom = Device::search_rom(one_wire, 0, 0, false, 0);
+    return Ds18b20(one_wire, rom);
+}
+
 bool Ds18b20::ping() {
     Rom old_rom = device.rom;
 
     bool ok = false;
     for (int t = 0; t < m_max_tries; t++) {
-        if (!device.presence_pulse()) {
+        if (!m_one_wire.reset()) {
             continue;
         }
         if (!device.read_rom()) {
@@ -79,7 +79,7 @@ float Ds18b20::measure_temperature() {
     // Request a temperature measurement
     bool ok = false;
     for (int t = 0; t < m_max_tries; t++) {
-        if (!device.presence_pulse()) {
+        if (!m_one_wire.reset()) {
             continue;
         }
         device.match_rom();
@@ -98,7 +98,7 @@ float Ds18b20::measure_temperature() {
     // Read the scratchpad
     ok = false;
     for (int t = 0; t < m_max_tries; t++) {
-        if (!device.presence_pulse()) {
+        if (!m_one_wire.reset()) {
             continue;
         }
         device.match_rom();
@@ -130,7 +130,7 @@ void Ds18b20::set_scratchpad(bool save) {
     // Write the new resolution to the scratchpad
     bool ok = false;
     for (int t = 0; t < m_max_tries; t++) {
-        if (!device.presence_pulse()) {
+        if (!m_one_wire.reset()) {
             continue;
         }
         device.match_rom();
@@ -148,7 +148,7 @@ void Ds18b20::set_scratchpad(bool save) {
     if (save) {
         bool ok = false;
         for (int t = 0; t < m_max_tries; t++) {
-            if (!device.presence_pulse()) {
+            if (!m_one_wire.reset()) {
                 continue;
             }
             device.match_rom();

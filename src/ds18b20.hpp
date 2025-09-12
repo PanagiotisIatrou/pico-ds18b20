@@ -5,15 +5,19 @@
 class Ds18b20 {
 private:
     Device device;
+
+    OneWire& m_one_wire;
     
     bool m_is_valid;
 
-    const int m_max_tries = 10;
+    static const int m_max_tries = 10;
 
     void set_scratchpad(bool save);
 
 public:
-    Ds18b20(OneWire& one_wire);
+    Ds18b20(OneWire& one_wire, Rom rom);
+
+    static Ds18b20 search_rom(OneWire& one_wire);
 
     bool ping();
 

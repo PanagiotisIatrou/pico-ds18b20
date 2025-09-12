@@ -36,6 +36,7 @@ void OneWire::write_bit(bool value) {
         sleep_us(60);
         gpio_set_dir(m_data_pin, GPIO_IN);
     }
+    sleep_us(5);
 }
 
 bool OneWire::read_bit() {
@@ -45,7 +46,7 @@ bool OneWire::read_bit() {
     gpio_set_dir(m_data_pin, GPIO_IN);
     sleep_us(10);
     bool data = gpio_get(m_data_pin);
-    sleep_us(45);
+    sleep_us(50);
 
     return data;
 }
@@ -54,7 +55,6 @@ void OneWire::write_byte(uint8_t value) {
     for (int i = 0; i < 8; i++) {
         bool bit = (value >> i) & 0x01;
         write_bit(bit);
-        sleep_us(5);
     }
 }
 
@@ -62,7 +62,6 @@ uint8_t OneWire::read_byte() {
     uint8_t byte = 0;
     for (int i = 0; i < 8; i++) {
         byte |= (read_bit() << i);
-        sleep_us(5);
     }
 
     return byte;
@@ -96,4 +95,27 @@ uint8_t OneWire::calculate_crc_byte(uint8_t crc, uint8_t byte) {
     }
 
     return crc;
+}
+
+bool OneWire::reset() {
+    // Write 0 to initialize connection
+    set_state(OneWireState::WRITE);
+    set_pin_value(0);
+    sleep_us(500);
+
+    // Wait for presence pulse
+    set_state(OneWireState::READ);
+    sleep_us(5);
+    bool detected_presence_pulse = wait_us_for_bit(0, 240 + 55);
+    if (!detected_presence_pulse) {
+        return false;
+    }
+
+    // Wait for presence pulse to end
+    bool detected_presence_pulse_end = wait_us_for_bit(1, 240);
+    if (!detected_presence_pulse_end) {
+        return false;
+    }
+
+    return true;
 }
