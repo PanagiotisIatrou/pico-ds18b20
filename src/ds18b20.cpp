@@ -27,7 +27,9 @@ Ds18b20::Ds18b20(OneWire& one_wire, Rom rom) : m_one_wire(one_wire), device(one_
     m_is_valid = true;
 }
 
-Ds18b20 Ds18b20::search_rom(OneWire& one_wire) {
+etl::vector<Ds18b20, 10> Ds18b20::search_rom(OneWire& one_wire) {
+    etl::vector<Ds18b20, 10> devices;
+
     bool ok = false;
     for (int t = 0; t < m_max_tries; t++) {
         if (!one_wire.reset()) {
@@ -38,7 +40,8 @@ Ds18b20 Ds18b20::search_rom(OneWire& one_wire) {
         break;
     }
     Rom rom = Device::search_rom(one_wire, 0, 0, false, 0);
-    return Ds18b20(one_wire, rom);
+    devices.emplace_back(Ds18b20(one_wire, rom));
+    return devices;
 }
 
 bool Ds18b20::ping() {

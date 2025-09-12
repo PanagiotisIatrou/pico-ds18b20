@@ -2,6 +2,8 @@
 
 #include "device.hpp"
 
+#include "etl/vector.h"
+
 class Ds18b20 {
 private:
     Device device;
@@ -17,7 +19,7 @@ private:
 public:
     Ds18b20(OneWire& one_wire, Rom rom);
 
-    static Ds18b20 search_rom(OneWire& one_wire);
+    static etl::vector<Ds18b20, 10> search_rom(OneWire& one_wire);
 
     bool ping();
 

@@ -19,7 +19,12 @@ int main()
 
     // Initialize a device on the data pin
     OneWire one_wire(data_pin);
-    Ds18b20 device = Ds18b20::search_rom(one_wire);
+    etl::vector<Ds18b20, 10> devices = Ds18b20::search_rom(one_wire);
+    if (devices.size() != 1) {
+        printf("?? Found %d devices\n", devices.size());
+        return 1;
+    }
+    Ds18b20 device = devices[0];
     if (!device.is_valid()) {
         printf("Could not initialize device");
         return 1;

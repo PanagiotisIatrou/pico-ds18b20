@@ -51,6 +51,7 @@ target_link_libraries(ds18b20
 # Add the standard include files to the build
 target_include_directories(ds18b20 PRIVATE
         ${CMAKE_CURRENT_LIST_DIR}/src
+        ${CMAKE_CURRENT_LIST_DIR}/include
 )
 
 pico_add_extra_outputs(ds18b20)
