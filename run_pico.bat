@@ -1,5 +1,5 @@
-usbipd bind --busid=5-1
-usbipd attach --wsl --busid=5-1
+usbipd bind --busid=6-1
+usbipd attach --wsl --busid=6-1
 
 timeout 1
 
@@ -8,4 +8,4 @@ wsl -e bash -c "echo '1379' | sudo -S /home/panagiotis/.pico-sdk/picotool/2.2.0/
 
 timeout 2
 
-usbipd attach --wsl --busid=5-1 --auto-attach
+usbipd attach --wsl --busid=6-1 --auto-attach

@@ -1,44 +1,172 @@
-#include <stdio.h>
-#include "pico/stdlib.h"
+#include "ds18b20.hpp"
 
-#include "rom.hpp"
-#include "one_wire.hpp"
-#include "device.hpp"
+Ds18b20::Ds18b20(OneWire& one_wire) : device(one_wire) {
+    // Read the ROM of the device
+    bool ok = false;
+    for (int t = 0; t < m_max_tries; t++) {
+        if (!device.presence_pulse()) {
+            continue;
+        }
+        if (!device.read_rom()) {
+            continue;
+        }
 
-const int data_pin = 0;
-
-int main()
-{
-    stdio_init_all();
-    while (!stdio_usb_connected()) {
-        tight_loop_contents();
+        ok = true;
+        break;
     }
-    sleep_ms(1000);
-    printf("Starting...\n");
-
-    // Initialize a device on the data pin
-    OneWire one_wire(data_pin);
-    Device device(one_wire);
-    if (!device.is_valid()) {
-        printf("Could not initialize device");
-        return 1;
+    if (!ok) {
+        m_is_valid = false;
+        return;
     }
 
-    device.set_resolution(Resolution::VeryHigh, true);
-    while (true) {
-        float temperature = device.measure_temperature();
-        if (temperature == -1000.0) {
-            printf("Lost device\n");
-            while (!device.ping()) {
-                sleep_ms(500);
+    // Read the scratchpad
+    ok = false;
+    for (int t = 0; t < m_max_tries; t++) {
+        if (!device.presence_pulse()) {
+            continue;
+        }
+        device.match_rom();
+        if (!device.read_scratchpad()) {
+            continue;
+        }
+
+        ok = true;
+        break;
+    }
+    if (!ok) {
+        m_is_valid = false;
+        return;
+    }
+
+    m_is_valid = true;
+}
+
+bool Ds18b20::ping() {
+    Rom old_rom = device.rom;
+
+    bool ok = false;
+    for (int t = 0; t < m_max_tries; t++) {
+        if (!device.presence_pulse()) {
+            continue;
+        }
+        if (!device.read_rom()) {
+            continue;
+        }
+
+        ok = true;
+        break;
+    }
+
+    if (ok && device.rom == old_rom) {
+        m_is_valid = true;
+        return true;
+    }
+
+    device.rom = old_rom;
+    m_is_valid = false;
+    return false;
+}
+
+bool Ds18b20::is_valid() {
+    return m_is_valid;
+}
+
+uint8_t Ds18b20::get_resolution() {
+    if (!m_is_valid) {
+        return 0;
+    }
+
+    return 9 + device.get_config_setting();
+}
+
+float Ds18b20::measure_temperature() {
+    if (!m_is_valid) {
+        return -1000.0;
+    }
+
+    // Request a temperature measurement
+    bool ok = false;
+    for (int t = 0; t < m_max_tries; t++) {
+        if (!device.presence_pulse()) {
+            continue;
+        }
+        device.match_rom();
+        if (!device.convert_t()) {
+            continue;
+        }
+
+        ok = true;
+        break;
+    }
+    if (!ok) {
+        m_is_valid = false;
+        return -1000.0;
+    }
+
+    // Read the scratchpad
+    ok = false;
+    for (int t = 0; t < m_max_tries; t++) {
+        if (!device.presence_pulse()) {
+            continue;
+        }
+        device.match_rom();
+        if (!device.read_scratchpad()) {
+            continue;
+        }
+
+        ok = true;
+        break;
+    }
+    if (!ok) {
+        m_is_valid = false;
+        return -1000.0;
+    }
+
+    // Extract the temperature from the scratchpad
+    return device.extract_temperature_from_scratchpad();
+}
+
+void Ds18b20::set_resolution(Resolution resolution, bool save) {
+    if (!m_is_valid) {
+        return;
+    }
+
+    // Write the new resolution to the scratchpad
+    bool ok = false;
+    for (int t = 0; t < m_max_tries; t++) {
+        if (!device.presence_pulse()) {
+            continue;
+        }
+        device.match_rom();
+        device.scratchpad.configuration = device.resolution_to_configuration(resolution);
+        device.write_scratchpad(device.scratchpad.temperature_high, device.scratchpad.temperature_low, device.scratchpad.configuration);
+    
+        ok = true;
+        break;
+    }
+    if (!ok) {
+        m_is_valid = false;
+        return;
+    }
+
+    // Save the resolution if specified
+    if (save) {
+        bool ok = false;
+        for (int t = 0; t < m_max_tries; t++) {
+            if (!device.presence_pulse()) {
+                continue;
             }
-            printf("Found again\n");
-        } else {
-            printf("%f\n", temperature);
+            device.match_rom();
+            if (!device.copy_scratchpad()) {
+                continue;
+            }
+
+            ok = true;
+            break;
+        }
+        if (!ok) {
+            m_is_valid = false;
+            return;
         }
     }
-
-    fflush(stdout);
-    sleep_ms(1000);
-    return 0;
 }

@@ -10,17 +10,12 @@ class Device {
 private:
     OneWire& m_one_wire;
 
-    Rom m_rom;
+public:
+    Device(OneWire& one_wire);
 
-    Scratchpad m_scratchpad;
+    Rom rom;
 
-    bool m_is_valid;
-
-    const int m_max_tries = 10;
-
-    uint8_t get_config_setting();
-
-    float extract_temperature_from_scratchpad();
+    Scratchpad scratchpad;
 
     bool presence_pulse();
 
@@ -42,16 +37,11 @@ private:
 
     bool copy_scratchpad();
 
-public:
-    Device(OneWire& one_wire);
+    // Helper functions
 
-    bool ping();
+    float extract_temperature_from_scratchpad();
 
-    bool is_valid();
+    uint8_t get_config_setting();
 
-    uint8_t get_resolution();
-
-    float measure_temperature();
-
-    void set_resolution(Resolution resolution, bool save);
+    uint8_t resolution_to_configuration(Resolution resolution);
 };
