@@ -17,9 +17,9 @@ public:
 
     bool is_valid();
 
-    uint8_t get_resolution();
-
     float measure_temperature();
+
+    uint8_t get_resolution();
 
     void set_resolution(Resolution resolution, bool save);
 };

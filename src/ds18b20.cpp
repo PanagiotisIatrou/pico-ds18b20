@@ -71,14 +71,6 @@ bool Ds18b20::is_valid() {
     return m_is_valid;
 }
 
-uint8_t Ds18b20::get_resolution() {
-    if (!m_is_valid) {
-        return 0;
-    }
-
-    return 9 + device.get_config_setting();
-}
-
 float Ds18b20::measure_temperature() {
     if (!m_is_valid) {
         return -1000.0;
@@ -124,6 +116,14 @@ float Ds18b20::measure_temperature() {
 
     // Extract the temperature from the scratchpad
     return device.extract_temperature_from_scratchpad();
+}
+
+uint8_t Ds18b20::get_resolution() {
+    if (!m_is_valid) {
+        return 0;
+    }
+
+    return 9 + device.get_config_setting();
 }
 
 void Ds18b20::set_resolution(Resolution resolution, bool save) {
