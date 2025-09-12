@@ -113,8 +113,8 @@ bool Device::read_scratchpad() {
     for (int i = 0; i < 2; i++) {
         scratchpad.temperature[i] = m_one_wire.read_byte();
     }
-    scratchpad.temperature_high = m_one_wire.read_byte();
-    scratchpad.temperature_low = m_one_wire.read_byte();
+    scratchpad.temperature_high_limit = m_one_wire.read_byte();
+    scratchpad.temperature_low_limit = m_one_wire.read_byte();
     scratchpad.configuration = m_one_wire.read_byte();
     for (int i = 0; i < 3; i++) {
         scratchpad.reserved[i] = m_one_wire.read_byte();
@@ -126,8 +126,8 @@ bool Device::read_scratchpad() {
     for (int i = 0; i < 2; i++) {
         crc = OneWire::calculate_crc_byte(crc, scratchpad.temperature[i]);
     }
-    crc = OneWire::calculate_crc_byte(crc, scratchpad.temperature_high);
-    crc = OneWire::calculate_crc_byte(crc, scratchpad.temperature_low);
+    crc = OneWire::calculate_crc_byte(crc, scratchpad.temperature_high_limit);
+    crc = OneWire::calculate_crc_byte(crc, scratchpad.temperature_low_limit);
     crc = OneWire::calculate_crc_byte(crc, scratchpad.configuration);
     for (int i = 0; i < 3; i++) {
         crc = OneWire::calculate_crc_byte(crc, scratchpad.reserved[i]);

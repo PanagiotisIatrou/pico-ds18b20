@@ -139,7 +139,7 @@ void Ds18b20::set_resolution(Resolution resolution, bool save) {
         }
         device.match_rom();
         device.scratchpad.configuration = device.resolution_to_configuration(resolution);
-        device.write_scratchpad(device.scratchpad.temperature_high, device.scratchpad.temperature_low, device.scratchpad.configuration);
+        device.write_scratchpad(device.scratchpad.temperature_high_limit, device.scratchpad.temperature_low_limit, device.scratchpad.configuration);
     
         ok = true;
         break;
