@@ -126,11 +126,7 @@ uint8_t Ds18b20::get_resolution() {
     return 9 + device.get_config_setting();
 }
 
-void Ds18b20::set_resolution(Resolution resolution, bool save) {
-    if (!m_is_valid) {
-        return;
-    }
-
+void Ds18b20::set_scratchpad(bool save) {
     // Write the new resolution to the scratchpad
     bool ok = false;
     for (int t = 0; t < m_max_tries; t++) {
@@ -138,7 +134,6 @@ void Ds18b20::set_resolution(Resolution resolution, bool save) {
             continue;
         }
         device.match_rom();
-        device.scratchpad.configuration = device.resolution_to_configuration(resolution);
         device.write_scratchpad(device.scratchpad.temperature_high_limit, device.scratchpad.temperature_low_limit, device.scratchpad.configuration);
     
         ok = true;
@@ -149,7 +144,7 @@ void Ds18b20::set_resolution(Resolution resolution, bool save) {
         return;
     }
 
-    // Save the resolution if specified
+    // Save the scratchpad if specified
     if (save) {
         bool ok = false;
         for (int t = 0; t < m_max_tries; t++) {
@@ -169,4 +164,37 @@ void Ds18b20::set_resolution(Resolution resolution, bool save) {
             return;
         }
     }
+}
+
+void Ds18b20::set_resolution(Resolution resolution, bool save) {
+    if (!m_is_valid) {
+        return;
+    }
+    uint8_t configuration = device.resolution_to_configuration(resolution);
+}
+
+int8_t Ds18b20::get_temperature_low_limit() {
+    return device.scratchpad.temperature_low_limit;
+}
+
+int8_t Ds18b20::get_temperature_high_limit() {
+    return device.scratchpad.temperature_high_limit;
+}
+
+void Ds18b20::set_temperature_low_limit(int8_t temperature, bool save) {
+    if (!m_is_valid) {
+        return;
+    }
+
+    device.scratchpad.temperature_low_limit = temperature;
+    set_scratchpad(save);
+}
+
+void Ds18b20::set_temperature_high_limit(int8_t temperature, bool save) {
+    if (!m_is_valid) {
+        return;
+    }
+
+    device.scratchpad.temperature_high_limit = temperature;
+    set_scratchpad(save);
 }
