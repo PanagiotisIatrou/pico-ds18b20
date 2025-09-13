@@ -4,16 +4,20 @@
 #include <cstring>
 #include "pico/stdlib.h"
 
+#include "common.hpp"
+
 Device::Device(OneWire& one_wire, Rom device_rom) : m_one_wire(one_wire) {
     rom = device_rom;
 }
 
 void Device::skip_rom() {
-    m_one_wire.write_byte(0xCC);
+    uint8_t command = static_cast<uint8_t>(RomCommands::SkipRom);
+    m_one_wire.write_byte(command);
 }
 
 Device::ReadRomInfo Device::read_rom(OneWire& one_wire) {
-    one_wire.write_byte(0x33);
+    uint8_t command = static_cast<uint8_t>(RomCommands::ReadRom);
+    one_wire.write_byte(command);
 
     // Read the rom
     uint8_t family_code = one_wire.read_byte();
@@ -32,7 +36,8 @@ Device::ReadRomInfo Device::read_rom(OneWire& one_wire) {
 }
 
 void Device::match_rom() {
-    m_one_wire.write_byte(0x55);
+    uint8_t command = static_cast<uint8_t>(RomCommands::MatchRom);
+    m_one_wire.write_byte(command);
 
     // Send family code
     m_one_wire.write_byte(rom.get_family_code());
@@ -47,7 +52,8 @@ void Device::match_rom() {
 }
 
 Device::SearchRomInfo Device::search_rom(OneWire& one_wire, uint64_t previous_sequence, int previous_sequence_length) {
-    one_wire.write_byte(0xF0);
+    uint8_t command = static_cast<uint8_t>(RomCommands::SearchRom);
+    one_wire.write_byte(command);
 
     SearchRomInfo info = {};
     uint64_t new_sequence = 0;
@@ -85,7 +91,8 @@ Device::SearchRomInfo Device::search_rom(OneWire& one_wire, uint64_t previous_se
 }
 
 bool Device::convert_t() {
-    m_one_wire.write_byte(0x44);
+    uint8_t command = static_cast<uint8_t>(FunctionCommands::ConvertT);
+    m_one_wire.write_byte(command);
 
     uint32_t start_time = to_ms_since_boot(get_absolute_time());
     while (to_ms_since_boot(get_absolute_time()) - start_time < 1000) {
@@ -100,7 +107,8 @@ bool Device::convert_t() {
 }
 
 bool Device::read_scratchpad() {
-    m_one_wire.write_byte(0xBE);
+    uint8_t command = static_cast<uint8_t>(FunctionCommands::ReadScratchpad);
+    m_one_wire.write_byte(command);
 
     // Read the scratchpad
     uint8_t temperature[2];
@@ -126,7 +134,8 @@ bool Device::read_scratchpad() {
 }
 
 void Device::write_scratchpad(int8_t temperature_high, int8_t temperature_low, uint8_t configuration) {
-    m_one_wire.write_byte(0x4E);
+    uint8_t command = static_cast<uint8_t>(FunctionCommands::WriteScratchpad);
+    m_one_wire.write_byte(command);
 
     m_one_wire.write_byte(temperature_high);
     m_one_wire.write_byte(temperature_low);
@@ -134,7 +143,8 @@ void Device::write_scratchpad(int8_t temperature_high, int8_t temperature_low, u
 }
 
 bool Device::copy_scratchpad() {
-    m_one_wire.write_byte(0x48);
+    uint8_t command = static_cast<uint8_t>(FunctionCommands::CopyScratchpad);
+    m_one_wire.write_byte(command);
 
     uint32_t start_time = to_ms_since_boot(get_absolute_time());
     while (to_ms_since_boot(get_absolute_time()) - start_time < 1000) {
@@ -149,7 +159,8 @@ bool Device::copy_scratchpad() {
 }
 
 bool Device::read_power_supply() {
-    m_one_wire.write_byte(0xB4);
+    uint8_t command = static_cast<uint8_t>(FunctionCommands::ReadPowerSupply);
+    m_one_wire.write_byte(command);
 
     return m_one_wire.read_bit();
 }
