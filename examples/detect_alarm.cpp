@@ -37,13 +37,13 @@ int main()
         if (result.has_value()) {
             float temperature = result.value();
             printf("%f | ", temperature);
+            if (devices[i].is_alarm_active()) {
+                printf("ALARM!!!\n");
+            } else {
+                printf("All safe!\n");
+            }
         } else {
             printf("x | ");
-        }
-        if (devices[i].is_alarm_active()) {
-            printf("ALARM!!!\n");
-        } else {
-            printf("All safe!\n");
         }
     }
 
