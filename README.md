@@ -68,6 +68,7 @@ For example:
 
 ## How to run
 
+- Add the [Embedded Temple Library (ETL)](https://github.com/ETLCPP/etl) to `include/etl`
 - Edit CMakeLists.txt and select the executable to run
 - Compile
   ```bash
