@@ -28,31 +28,31 @@ void Device::skip_rom() {
     m_one_wire.write_byte(0xCC);
 }
 
-bool Device::read_rom() {
-    m_one_wire.write_byte(0x33);
+Device::ReadRomInfo Device::read_rom(OneWire& one_wire) {
+    one_wire.write_byte(0x33);
+
+    ReadRomInfo info{};
 
     // Receive family code
-    rom.family_code = m_one_wire.read_byte();
+    info.rom.family_code = one_wire.read_byte();
 
     // Receive family code
     for (int k = 5; k >= 0; k--) {
-        rom.serial_number[k] = m_one_wire.read_byte();
+        info.rom.serial_number[k] = one_wire.read_byte();
     }
 
     // Receive CRC code
-    rom.crc_code = m_one_wire.read_byte();
+    info.rom.crc_code = one_wire.read_byte();
 
     // Check ROM CRC
     uint8_t crc = 0;
-    crc = OneWire::calculate_crc_byte(crc, rom.family_code);
+    crc = OneWire::calculate_crc_byte(crc, info.rom.family_code);
     for (int i = 5; i >= 0; i--) {
-        crc = OneWire::calculate_crc_byte(crc, rom.serial_number[i]);
+        crc = OneWire::calculate_crc_byte(crc, info.rom.serial_number[i]);
     }
-    if (crc != rom.crc_code) {
-        return false;
-    }
+    info.is_valid = (crc != info.rom.crc_code && info.rom != Rom{});
 
-    return true;
+    return info;
 }
 
 void Device::match_rom() {
@@ -115,7 +115,7 @@ Device::SearchRomInfo Device::search_rom(OneWire& one_wire, uint64_t previous_se
     for (int i = 5; i >= 0; i--) {
         crc = OneWire::calculate_crc_byte(crc, info.rom.serial_number[i]);
     }
-    info.is_crc_valid = (crc == info.rom.crc_code);
+    info.is_valid = (crc == info.rom.crc_code && info.rom != Rom{});
 
     return info;
 }

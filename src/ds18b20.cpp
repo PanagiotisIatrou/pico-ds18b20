@@ -45,7 +45,7 @@ etl::vector<Ds18b20, 10> Ds18b20::search_rom(OneWire& one_wire) {
         
         // Grab a ROM
         info = Device::search_rom(one_wire, info.last_choice_path, info.last_choice_path_size);
-        if (info.rom != Rom{} && info.is_crc_valid) {
+        if (info.is_valid) {
             devices.emplace_back(Ds18b20(one_wire, info.rom));
         }
     }
@@ -56,29 +56,19 @@ etl::vector<Ds18b20, 10> Ds18b20::search_rom(OneWire& one_wire) {
 }
 
 bool Ds18b20::ping() {
-    Rom old_rom = device.rom;
-
     bool ok = false;
     for (int t = 0; t < m_max_tries; t++) {
         if (!m_one_wire.reset()) {
             continue;
         }
-        if (!device.read_rom()) {
-            continue;
-        }
+        device.match_rom();
 
         ok = true;
         break;
     }
 
-    if (ok && device.rom == old_rom) {
-        m_is_valid = true;
-        return true;
-    }
-
-    device.rom = old_rom;
-    m_is_valid = false;
-    return false;
+    m_is_valid = ok;
+    return ok;
 }
 
 bool Ds18b20::is_valid() {

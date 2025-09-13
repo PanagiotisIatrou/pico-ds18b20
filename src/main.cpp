@@ -31,7 +31,7 @@ int main()
     while (true) {
         printf("| ");
         for (int i = 0; i < devices.size(); i++) {
-            // devices[i].ping();
+            devices[i].ping();
             float temperature = devices[i].measure_temperature();
             if (temperature == -1000.0) {
                 printf("x | ");
