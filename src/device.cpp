@@ -10,7 +10,7 @@ Device::Device(OneWire& one_wire, Rom device_rom) : m_one_wire(one_wire) {
 
 float Device::extract_temperature_from_scratchpad() {
     uint8_t config_setting = get_config_setting();
-    int16_t temperature_data = scratchpad.temperature[1] + (scratchpad.temperature[0] << 8);
+    int16_t temperature_data = scratchpad.temperature[0] + (scratchpad.temperature[1] << 8);
     temperature_data = temperature_data >> (3 - config_setting);
     float temperature = temperature_data / (float)(1 << (config_setting + 1));
     return temperature;
@@ -28,7 +28,7 @@ uint64_t Device::encode_rom(Rom decoded_rom) {
     uint64_t rom = 0;
     rom |= ((uint64_t)decoded_rom.family_code);
     for (int i = 0; i < 6; i++) {
-        rom |= (((uint64_t)decoded_rom.serial_number[5 - i]) << ((i + 1) * 8));
+        rom |= (((uint64_t)decoded_rom.serial_number[i]) << ((i + 1) * 8));
     }
     rom |= (((uint64_t)decoded_rom.crc_code) << 56);
     return rom;
@@ -38,7 +38,7 @@ Rom Device::decode_rom(uint64_t encoded_rom) {
     Rom rom;
     rom.family_code = encoded_rom & 0xFF;
     for (int i = 0; i < 6; i++) {
-        rom.serial_number[5 - i] = (encoded_rom >> (8 * (i + 1))) & 0xFF;
+        rom.serial_number[i] = (encoded_rom >> (8 * (i + 1))) & 0xFF;
     }
     rom.crc_code = (encoded_rom >> 56) & 0xFF;
     return rom;
@@ -57,8 +57,8 @@ Device::ReadRomInfo Device::read_rom(OneWire& one_wire) {
     info.rom.family_code = one_wire.read_byte();
 
     // Receive family code
-    for (int k = 5; k >= 0; k--) {
-        info.rom.serial_number[k] = one_wire.read_byte();
+    for (int i = 0; i < 6; i++) {
+        info.rom.serial_number[i] = one_wire.read_byte();
     }
 
     // Receive CRC code
@@ -67,7 +67,7 @@ Device::ReadRomInfo Device::read_rom(OneWire& one_wire) {
     // Check ROM CRC
     uint8_t crc = 0;
     crc = OneWire::calculate_crc_byte(crc, info.rom.family_code);
-    for (int i = 5; i >= 0; i--) {
+    for (int i = 0; i < 6; i++) {
         crc = OneWire::calculate_crc_byte(crc, info.rom.serial_number[i]);
     }
     info.is_valid = (crc != info.rom.crc_code && info.rom != Rom{});
@@ -82,8 +82,8 @@ void Device::match_rom() {
     m_one_wire.write_byte(rom.family_code);
 
     // Send serial number
-    for (int k = 5; k >= 0; k--) {
-        m_one_wire.write_byte(rom.serial_number[k]);
+    for (int i = 0; i < 6; i++) {
+        m_one_wire.write_byte(rom.serial_number[i]);
     }
 
     // Send CRC code
@@ -125,7 +125,7 @@ Device::SearchRomInfo Device::search_rom(OneWire& one_wire, uint64_t previous_se
     // Check rom CRC
     uint8_t crc = 0;
     crc = OneWire::calculate_crc_byte(crc, info.rom.family_code);
-    for (int i = 5; i >= 0; i--) {
+    for (int i = 0; i < 6; i++) {
         crc = OneWire::calculate_crc_byte(crc, info.rom.serial_number[i]);
     }
     info.is_valid = (crc == info.rom.crc_code && info.rom != Rom{});
@@ -152,26 +152,26 @@ bool Device::read_scratchpad() {
     m_one_wire.write_byte(0xBE);
 
     // Read the scratchpad
-    for (int i = 1; i >= 0; i--) {
+    for (int i = 0; i < 2; i++) {
         scratchpad.temperature[i] = m_one_wire.read_byte();
     }
     scratchpad.temperature_high_limit = m_one_wire.read_byte();
     scratchpad.temperature_low_limit = m_one_wire.read_byte();
     scratchpad.configuration = m_one_wire.read_byte();
-    for (int i = 2; i >= 0; i--) {
+    for (int i = 0; i < 3; i++) {
         scratchpad.reserved[i] = m_one_wire.read_byte();
     }
     scratchpad.crc_code = m_one_wire.read_byte();
 
     // Check Scratchpad CRC
     uint8_t crc = 0;
-    for (int i = 1; i >= 0; i--) {
+    for (int i = 0; i < 2; i++) {
         crc = OneWire::calculate_crc_byte(crc, scratchpad.temperature[i]);
     }
     crc = OneWire::calculate_crc_byte(crc, scratchpad.temperature_high_limit);
     crc = OneWire::calculate_crc_byte(crc, scratchpad.temperature_low_limit);
     crc = OneWire::calculate_crc_byte(crc, scratchpad.configuration);
-    for (int i = 2; i >= 0; i--) {
+    for (int i = 0; i < 3; i++) {
         crc = OneWire::calculate_crc_byte(crc, scratchpad.reserved[i]);
     }
     if (crc != scratchpad.crc_code) {
