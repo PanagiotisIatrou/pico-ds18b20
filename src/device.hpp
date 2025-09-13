@@ -7,8 +7,17 @@
 #include "one_wire.hpp"
 
 class Device {
+public:
+    struct SearchInfo {
+        Rom rom;
+        uint64_t last_choice_path = 0;
+        int last_choice_path_size = -1;
+    };
+    
 private:
     OneWire& m_one_wire;
+
+    static std::optional<Device::SearchInfo> search(OneWire& one_wire, uint64_t previous_sequence, int previous_sequence_length);
 
 public:
     Device(OneWire& one_wire, Rom device_rom);
@@ -25,13 +34,9 @@ public:
 
     void match_rom();
 
-    struct SearchRomInfo {
-        Rom rom;
-        uint64_t last_choice_path = 0;
-        int last_choice_path_size = -1;
-    };
+    static std::optional<Device::SearchInfo> search_rom(OneWire& one_wire, uint64_t previous_sequence, int previous_sequence_length);
 
-    static std::optional<SearchRomInfo> search_rom(OneWire& one_wire, uint64_t previous_sequence, int previous_sequence_length);
+    static std::optional<Device::SearchInfo> search_alarm(OneWire& one_wire, uint64_t previous_sequence, int previous_sequence_length);
 
     // Function commands
 

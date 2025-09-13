@@ -27,7 +27,7 @@ Ds18b20::Ds18b20(OneWire& one_wire, Rom rom) : m_one_wire(one_wire), device(one_
 
 etl::vector<Ds18b20, 10> Ds18b20::search_rom(OneWire& one_wire) {
     etl::vector<Ds18b20, 10> devices;
-    Device::SearchRomInfo info{};
+    Device::SearchInfo info{};
     info.last_choice_path_size = -2;
     while (info.last_choice_path_size != -1) {
         // Reset
@@ -64,7 +64,7 @@ bool Ds18b20::ping() {
         }
         auto result = Device::search_rom(m_one_wire, rom, 64);
         if (result.has_value()) {
-            Device::SearchRomInfo info = result.value();
+            Device::SearchInfo info = result.value();
             if (info.rom != device.rom) {
                 continue;
             }
@@ -230,4 +230,26 @@ bool Ds18b20::set_temperature_high_limit(int8_t temperature, bool save) {
     }
 
     return set_scratchpad(temperature, device.scratchpad.get_temperature_low_limit(), device.scratchpad.get_configuration(), save);
+}
+
+bool Ds18b20::is_alarm_active() {
+    for (int t = 0; t < m_max_tries; t++) {
+        uint64_t rom = Rom::encode_rom(device.rom);
+        if (!m_one_wire.reset()) {
+            continue;
+        }
+        auto result = Device::search_alarm(m_one_wire, rom, 64);
+        if (result.has_value()) {
+            Device::SearchInfo info = result.value();
+            if (info.rom == device.rom) {
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            continue;
+        }
+    }
+
+    return false;
 }

@@ -19,8 +19,6 @@ private:
 public:
     Ds18b20(OneWire& one_wire, Rom rom);
 
-    static etl::vector<Ds18b20, 10> search_rom(OneWire& one_wire);
-
     bool ping();
 
     bool is_valid();
@@ -38,4 +36,8 @@ public:
     bool set_temperature_low_limit(int8_t temperature, bool save);
 
     bool set_temperature_high_limit(int8_t temperature, bool save);
+
+    bool is_alarm_active();
+
+    static etl::vector<Ds18b20, 10> search_rom(OneWire& one_wire);
 };

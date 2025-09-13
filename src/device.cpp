@@ -52,11 +52,8 @@ void Device::match_rom() {
     m_one_wire.write_byte(rom.get_crc_code());
 }
 
-std::optional<Device::SearchRomInfo> Device::search_rom(OneWire& one_wire, uint64_t previous_sequence, int previous_sequence_length) {
-    uint8_t command = static_cast<uint8_t>(RomCommands::SearchRom);
-    one_wire.write_byte(command);
-
-    SearchRomInfo info = {};
+std::optional<Device::SearchInfo> Device::search(OneWire& one_wire, uint64_t previous_sequence, int previous_sequence_length) {
+    SearchInfo info = {};
     uint64_t new_sequence = 0;
     for (int i = 0; i < 64; i++) {
         bool first_bit = one_wire.read_bit();
@@ -89,6 +86,20 @@ std::optional<Device::SearchRomInfo> Device::search_rom(OneWire& one_wire, uint6
     } else {
         return std::nullopt;
     }
+}
+
+std::optional<Device::SearchInfo> Device::search_rom(OneWire& one_wire, uint64_t previous_sequence, int previous_sequence_length) {
+    uint8_t command = static_cast<uint8_t>(RomCommands::SearchRom);
+    one_wire.write_byte(command);
+
+    return search(one_wire, previous_sequence, previous_sequence_length);
+}
+
+std::optional<Device::SearchInfo> Device::search_alarm(OneWire& one_wire, uint64_t previous_sequence, int previous_sequence_length) {
+    uint8_t command = static_cast<uint8_t>(RomCommands::SearchAlarm);
+    one_wire.write_byte(command);
+
+    return search(one_wire, previous_sequence, previous_sequence_length);
 }
 
 std::optional<uint32_t> Device::convert_t() {
