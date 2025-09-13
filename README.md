@@ -61,6 +61,68 @@ For example:
   </tbody>
 </table>
 
+## How to use
+
+**See the examples folder for complete programs**
+
+Finds all the devices connected to GPIO 0
+
+```c++
+#include "one_wire.hpp"
+#include "ds18b20.hpp"
+
+OneWire one_wire(0);
+etl::vector<Ds18b20, 10> devices = Ds18b20::find_devices(one_wire);
+
+Ds18b20& device = devices[0];
+// ...
+```
+
+Measure and print the temperature of a device
+
+```c++
+std::optional<float> result = device.measure_temperature();
+if (result.has_value()) {
+    float temperature = result.value();
+    printf("%f\n", temperature);
+} else {
+    printf("Could not calculate temperature\n");
+}
+```
+
+Set resolution
+
+```c++
+bool success = device.set_resolution(Resolution::VeryHigh, true);
+if (!success) {
+    printf("Could not set resolution\n");
+}
+```
+
+Set the low/high alarm temperature range values
+
+```c++
+bool success0 = device.set_temperature_low_limit(-20, true);
+bool success1 = device.set_temperature_high_limit(80, true);
+if (!success0 || !success1) {
+    printf("Could not set temperature limits\n");
+}
+```
+
+Revive a device after disconnect for whatever reason
+
+```c++
+// device fails
+// ...
+
+bool success = device.ping();
+if (success) {
+    printf("Revived!\n");
+} else {
+    printf("Still could not revive :(\n");
+}
+```
+
 ## Features
 - Measure temperature
   - &plusmn;0.5°C from -10°C to +85°C
