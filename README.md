@@ -66,6 +66,16 @@ For example:
   </tbody>
 </table>
 
+## How to run
+
+- Edit CMakeLists.txt and select the executable to run
+- Compile
+  ```bash
+  ninja -C /home/panagiotis/pico_projects/pico-ds18b20/build
+  ```
+- Set the Raspberry Pi Pico in bootloader mode by connecting it through USB while pressing its button
+- Load `build/ds18b20.elf` to Raspberry Pi Pico
+
 ## How to use
 
 **See the examples folder for complete programs**
