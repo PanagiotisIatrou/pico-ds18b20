@@ -71,7 +71,9 @@ For example:
   - Medium: 0.125°C steps
   - High: 0.25°C steps
   - Very High: 0.5°C steps
-- Save resolution for retention after power cycle
+- Detect alarm when temperature goes out of bounds
+- Set the low and high bounds of the temperature alarm range
+- Revive a device after a disconnect
 
 ## Resources
 
