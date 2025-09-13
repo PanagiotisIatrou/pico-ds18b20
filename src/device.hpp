@@ -49,6 +49,8 @@ public:
 
     bool copy_scratchpad();
 
+    bool read_power_supply();
+
     // Helper functions
 
     float extract_temperature_from_scratchpad();

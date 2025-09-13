@@ -190,3 +190,9 @@ bool Device::copy_scratchpad() {
 
     return false;
 }
+
+bool Device::read_power_supply() {
+    m_one_wire.write_byte(0xB4);
+
+    return m_one_wire.read_bit();
+}
