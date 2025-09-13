@@ -4,8 +4,6 @@
 #include "scratchpad.hpp"
 #include "one_wire.hpp"
 
-enum class Resolution { Low = 0b00, Medium = 0b01, High = 0b10, VeryHigh = 0b11 };
-
 class Device {
 private:
     OneWire& m_one_wire;
@@ -50,12 +48,4 @@ public:
     bool copy_scratchpad();
 
     bool read_power_supply();
-
-    // Helper functions
-
-    float extract_temperature_from_scratchpad();
-
-    uint8_t get_config_setting();
-
-    uint8_t resolution_to_configuration(Resolution resolution);
 };

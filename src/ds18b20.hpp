@@ -14,7 +14,7 @@ private:
 
     static const int m_max_tries = 10;
 
-    void set_scratchpad(bool save);
+    void set_scratchpad(int8_t temperature_high_limit, int8_t temperature_low_limit, uint8_t configuration, bool save);
 
 public:
     Ds18b20(OneWire& one_wire, Rom rom);

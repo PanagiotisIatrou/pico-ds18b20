@@ -131,7 +131,7 @@ float Ds18b20::measure_temperature() {
     }
 
     // Extract the temperature from the scratchpad
-    return device.extract_temperature_from_scratchpad();
+    return device.scratchpad.calculate_temperature();
 }
 
 uint8_t Ds18b20::get_resolution() {
@@ -139,18 +139,28 @@ uint8_t Ds18b20::get_resolution() {
         return 0;
     }
 
-    return 9 + device.get_config_setting();
+    return device.scratchpad.get_resolution();
 }
 
-void Ds18b20::set_scratchpad(bool save) {
-    // Write the new resolution to the scratchpad
+void Ds18b20::set_scratchpad(int8_t temperature_high_limit, int8_t temperature_low_limit, uint8_t configuration, bool save) {
+    // Write the new values to the scratchpad and read it again
     bool ok = false;
     for (int t = 0; t < m_max_tries; t++) {
+        // Write to the scratchpad
         if (!m_one_wire.reset()) {
             continue;
         }
         device.match_rom();
-        device.write_scratchpad(device.scratchpad.temperature_high_limit, device.scratchpad.temperature_low_limit, device.scratchpad.configuration);
+        device.write_scratchpad(temperature_high_limit, temperature_low_limit, configuration);
+
+        // Read the scratchpad
+        if (!m_one_wire.reset()) {
+            continue;
+        }
+        device.match_rom();
+        if (!device.read_scratchpad()) {
+            continue;
+        }
     
         ok = true;
         break;
@@ -186,15 +196,15 @@ void Ds18b20::set_resolution(Resolution resolution, bool save) {
     if (!m_is_valid) {
         return;
     }
-    uint8_t configuration = device.resolution_to_configuration(resolution);
+    uint8_t configuration = device.scratchpad.resolution_to_configuration(resolution);
 }
 
 int8_t Ds18b20::get_temperature_low_limit() {
-    return device.scratchpad.temperature_low_limit;
+    return device.scratchpad.get_temperature_low_limit();
 }
 
 int8_t Ds18b20::get_temperature_high_limit() {
-    return device.scratchpad.temperature_high_limit;
+    return device.scratchpad.get_temperature_high_limit();
 }
 
 void Ds18b20::set_temperature_low_limit(int8_t temperature, bool save) {
@@ -202,8 +212,7 @@ void Ds18b20::set_temperature_low_limit(int8_t temperature, bool save) {
         return;
     }
 
-    device.scratchpad.temperature_low_limit = temperature;
-    set_scratchpad(save);
+    set_scratchpad(device.scratchpad.get_temperature_high_limit(), temperature, device.scratchpad.get_configuration(), save);
 }
 
 void Ds18b20::set_temperature_high_limit(int8_t temperature, bool save) {
@@ -211,6 +220,5 @@ void Ds18b20::set_temperature_high_limit(int8_t temperature, bool save) {
         return;
     }
 
-    device.scratchpad.temperature_high_limit = temperature;
-    set_scratchpad(save);
+    set_scratchpad(temperature, device.scratchpad.get_temperature_low_limit(), device.scratchpad.get_configuration(), save);
 }

@@ -8,22 +8,6 @@ Device::Device(OneWire& one_wire, Rom device_rom) : m_one_wire(one_wire) {
     rom = device_rom;
 }
 
-float Device::extract_temperature_from_scratchpad() {
-    uint8_t config_setting = get_config_setting();
-    int16_t temperature_data = scratchpad.temperature[0] + (scratchpad.temperature[1] << 8);
-    temperature_data = temperature_data >> (3 - config_setting);
-    float temperature = temperature_data / (float)(1 << (config_setting + 1));
-    return temperature;
-}
-
-uint8_t Device::get_config_setting() {
-    return (scratchpad.configuration & 0b01100000) >> 5;
-}
-
-uint8_t Device::resolution_to_configuration(Resolution resolution) {
-    return 0b00011111 | ((uint8_t)resolution << 5);
-}
-
 void Device::skip_rom() {
     m_one_wire.write_byte(0xCC);
 }
@@ -119,29 +103,22 @@ bool Device::read_scratchpad() {
     m_one_wire.write_byte(0xBE);
 
     // Read the scratchpad
+    uint8_t temperature[2];
     for (int i = 0; i < 2; i++) {
-        scratchpad.temperature[i] = m_one_wire.read_byte();
+        temperature[i] = m_one_wire.read_byte();
     }
-    scratchpad.temperature_high_limit = m_one_wire.read_byte();
-    scratchpad.temperature_low_limit = m_one_wire.read_byte();
-    scratchpad.configuration = m_one_wire.read_byte();
+    uint8_t temperature_high_limit = m_one_wire.read_byte();
+    uint8_t temperature_low_limit = m_one_wire.read_byte();
+    uint8_t configuration = m_one_wire.read_byte();
+    uint8_t reserved[3];
     for (int i = 0; i < 3; i++) {
-        scratchpad.reserved[i] = m_one_wire.read_byte();
+        reserved[i] = m_one_wire.read_byte();
     }
-    scratchpad.crc_code = m_one_wire.read_byte();
+    uint8_t crc_code = m_one_wire.read_byte();
+    scratchpad = Scratchpad(temperature, temperature_high_limit, temperature_low_limit, configuration, reserved, crc_code);
 
     // Check Scratchpad CRC
-    uint8_t crc = 0;
-    for (int i = 0; i < 2; i++) {
-        crc = OneWire::calculate_crc_byte(crc, scratchpad.temperature[i]);
-    }
-    crc = OneWire::calculate_crc_byte(crc, scratchpad.temperature_high_limit);
-    crc = OneWire::calculate_crc_byte(crc, scratchpad.temperature_low_limit);
-    crc = OneWire::calculate_crc_byte(crc, scratchpad.configuration);
-    for (int i = 0; i < 3; i++) {
-        crc = OneWire::calculate_crc_byte(crc, scratchpad.reserved[i]);
-    }
-    if (crc != scratchpad.crc_code) {
+    if (!scratchpad.has_valid_crc()) {
         return false;
     }
 
