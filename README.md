@@ -34,7 +34,7 @@ You first need to determine whether your ds18b20 has a built-in pull-up resistor
   </tbody>
 </table>
 
-In case your ds18b20 doesn't have a built-in pull-up resistor, you need to connect one $4.7k\Omega$ yourself.
+In case your ds18b20 doesn't have a built-in pull-up resistor, you need to connect one $4.7k\Omega$ resistor across VDD and DQ yourself.
 
 Connect:
 - VDD: to 5V (ex. VBUS pin) or 3.3V (ex. 3V3 pin)
