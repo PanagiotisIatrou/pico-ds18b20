@@ -3,8 +3,6 @@
 #include <stdio.h>
 
 Ds18b20::Ds18b20(OneWire& one_wire, Rom rom) : m_one_wire(one_wire), device(one_wire, rom) {
-    device.rom = rom;
-
     // Read the scratchpad
     bool ok = false;
     for (int t = 0; t < m_max_tries; t++) {
@@ -58,10 +56,29 @@ etl::vector<Ds18b20, 10> Ds18b20::search_rom(OneWire& one_wire) {
 bool Ds18b20::ping() {
     bool ok = false;
     for (int t = 0; t < m_max_tries; t++) {
+        // Read the rom to see if it matches
+        uint64_t rom = 0;
+        rom |= ((uint64_t)device.rom.family_code);
+        for (int i = 0; i < 6; i++) {
+            rom |= (((uint64_t)device.rom.serial_number[5 - i]) << ((i + 1) * 8));
+        }
+        rom |= (((uint64_t)device.rom.crc_code) << 56);
+        if (!m_one_wire.reset()) {
+            continue;
+        }
+        Device::SearchRomInfo info = Device::search_rom(m_one_wire, rom, 64);
+        if (!info.is_valid || info.rom != device.rom) {
+            continue;
+        }
+
+        // Check that power supply is external 
         if (!m_one_wire.reset()) {
             continue;
         }
         device.match_rom();
+        if (!device.read_power_supply()) {
+            continue;
+        }
 
         ok = true;
         break;
