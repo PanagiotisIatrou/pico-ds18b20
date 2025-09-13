@@ -24,26 +24,6 @@ uint8_t Device::resolution_to_configuration(Resolution resolution) {
     return 0b00011111 | ((uint8_t)resolution << 5);
 }
 
-uint64_t Device::encode_rom(Rom decoded_rom) {
-    uint64_t rom = 0;
-    rom |= ((uint64_t)decoded_rom.family_code);
-    for (int i = 0; i < 6; i++) {
-        rom |= (((uint64_t)decoded_rom.serial_number[i]) << ((i + 1) * 8));
-    }
-    rom |= (((uint64_t)decoded_rom.crc_code) << 56);
-    return rom;
-}
-
-Rom Device::decode_rom(uint64_t encoded_rom) {
-    Rom rom;
-    rom.family_code = encoded_rom & 0xFF;
-    for (int i = 0; i < 6; i++) {
-        rom.serial_number[i] = (encoded_rom >> (8 * (i + 1))) & 0xFF;
-    }
-    rom.crc_code = (encoded_rom >> 56) & 0xFF;
-    return rom;
-}
-
 void Device::skip_rom() {
     m_one_wire.write_byte(0xCC);
 }
@@ -51,26 +31,18 @@ void Device::skip_rom() {
 Device::ReadRomInfo Device::read_rom(OneWire& one_wire) {
     one_wire.write_byte(0x33);
 
-    ReadRomInfo info{};
-
-    // Receive family code
-    info.rom.family_code = one_wire.read_byte();
-
-    // Receive family code
+    // Read the rom
+    uint8_t family_code = one_wire.read_byte();
+    uint8_t serial_number[6];
     for (int i = 0; i < 6; i++) {
-        info.rom.serial_number[i] = one_wire.read_byte();
+        serial_number[i] = one_wire.read_byte();
     }
+    uint8_t crc_code = one_wire.read_byte();
 
-    // Receive CRC code
-    info.rom.crc_code = one_wire.read_byte();
-
-    // Check ROM CRC
-    uint8_t crc = 0;
-    crc = OneWire::calculate_crc_byte(crc, info.rom.family_code);
-    for (int i = 0; i < 6; i++) {
-        crc = OneWire::calculate_crc_byte(crc, info.rom.serial_number[i]);
-    }
-    info.is_valid = (crc != info.rom.crc_code && info.rom != Rom{});
+    // Create the return object
+    Rom rom(family_code, serial_number, crc_code);
+    bool is_valid = (!rom.is_empty() && rom.has_valid_crc());
+    ReadRomInfo info =  {.rom = rom, .is_valid = is_valid};
 
     return info;
 }
@@ -79,15 +51,15 @@ void Device::match_rom() {
     m_one_wire.write_byte(0x55);
 
     // Send family code
-    m_one_wire.write_byte(rom.family_code);
+    m_one_wire.write_byte(rom.get_family_code());
 
     // Send serial number
     for (int i = 0; i < 6; i++) {
-        m_one_wire.write_byte(rom.serial_number[i]);
+        m_one_wire.write_byte(rom.get_serial_number(i));
     }
 
     // Send CRC code
-    m_one_wire.write_byte(rom.crc_code);
+    m_one_wire.write_byte(rom.get_crc_code());
 }
 
 Device::SearchRomInfo Device::search_rom(OneWire& one_wire, uint64_t previous_sequence, int previous_sequence_length) {
@@ -120,15 +92,10 @@ Device::SearchRomInfo Device::search_rom(OneWire& one_wire, uint64_t previous_se
         one_wire.write_bit(bit_choice);
     }
 
-    info.rom = Device::decode_rom(new_sequence);
+    info.rom = Rom::decode_rom(new_sequence);
 
     // Check rom CRC
-    uint8_t crc = 0;
-    crc = OneWire::calculate_crc_byte(crc, info.rom.family_code);
-    for (int i = 0; i < 6; i++) {
-        crc = OneWire::calculate_crc_byte(crc, info.rom.serial_number[i]);
-    }
-    info.is_valid = (crc == info.rom.crc_code && info.rom != Rom{});
+    info.is_valid = (!info.rom.is_empty() && info.rom.has_valid_crc());
 
     return info;
 }

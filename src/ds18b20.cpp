@@ -57,7 +57,7 @@ bool Ds18b20::ping() {
     bool ok = false;
     for (int t = 0; t < m_max_tries; t++) {
         // Read the rom to see if it matches
-        uint64_t rom = Device::encode_rom(device.rom);
+        uint64_t rom = Rom::encode_rom(device.rom);
         if (!m_one_wire.reset()) {
             continue;
         }
