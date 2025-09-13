@@ -25,18 +25,26 @@ int main()
         return 0;
     }
 
+    // Set the resolution of the devices
     for (int i = 0; i < devices.size(); i++) {
-        devices[i].set_resolution(Resolution::VeryHigh, true);
+        bool success = devices[i].set_resolution(Resolution::VeryHigh, true);
+        if (!success) {
+            printf("Could not set accuracy for a device\n");
+            return 1;
+        }
     }
+
+    // Continuously calculate and print the temperatures
     while (true) {
         printf("| ");
         for (int i = 0; i < devices.size(); i++) {
             devices[i].ping();
-            float temperature = devices[i].measure_temperature();
-            if (temperature == -1000.0) {
-                printf("x | ");
-            } else {
+            std::optional<float> result = devices[i].measure_temperature();
+            if (result.has_value()) {
+                float temperature = result.value();
                 printf("%f | ", temperature);
+            } else {
+                printf("x | ");
             }
         }
         printf("\n");

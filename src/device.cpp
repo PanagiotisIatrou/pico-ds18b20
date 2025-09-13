@@ -15,7 +15,7 @@ void Device::skip_rom() {
     m_one_wire.write_byte(command);
 }
 
-Device::ReadRomInfo Device::read_rom(OneWire& one_wire) {
+std::optional<Rom> Device::read_rom(OneWire& one_wire) {
     uint8_t command = static_cast<uint8_t>(RomCommands::ReadRom);
     one_wire.write_byte(command);
 
@@ -26,13 +26,14 @@ Device::ReadRomInfo Device::read_rom(OneWire& one_wire) {
         serial_number[i] = one_wire.read_byte();
     }
     uint8_t crc_code = one_wire.read_byte();
-
-    // Create the return object
     Rom rom(family_code, serial_number, crc_code);
-    bool is_valid = (!rom.is_empty() && rom.has_valid_crc());
-    ReadRomInfo info =  {.rom = rom, .is_valid = is_valid};
 
-    return info;
+    // Return the rom
+    if (!rom.is_empty() && rom.has_valid_crc()) {
+        return rom;
+    } else {
+        return std::nullopt;
+    }
 }
 
 void Device::match_rom() {
@@ -51,7 +52,7 @@ void Device::match_rom() {
     m_one_wire.write_byte(rom.get_crc_code());
 }
 
-Device::SearchRomInfo Device::search_rom(OneWire& one_wire, uint64_t previous_sequence, int previous_sequence_length) {
+std::optional<Device::SearchRomInfo> Device::search_rom(OneWire& one_wire, uint64_t previous_sequence, int previous_sequence_length) {
     uint8_t command = static_cast<uint8_t>(RomCommands::SearchRom);
     one_wire.write_byte(command);
 
@@ -76,21 +77,21 @@ Device::SearchRomInfo Device::search_rom(OneWire& one_wire, uint64_t previous_se
                 info.last_choice_path_size = i;
             }
         } else {
-            return {};
+            return std::nullopt;
         }
         new_sequence |= ((uint64_t)bit_choice << i);
         one_wire.write_bit(bit_choice);
     }
 
     info.rom = Rom::decode_rom(new_sequence);
-
-    // Check rom CRC
-    info.is_valid = (!info.rom.is_empty() && info.rom.has_valid_crc());
-
-    return info;
+    if (!info.rom.is_empty() && info.rom.has_valid_crc()) {
+        return info;
+    } else {
+        return std::nullopt;
+    }
 }
 
-bool Device::convert_t() {
+std::optional<uint32_t> Device::convert_t() {
     uint8_t command = static_cast<uint8_t>(FunctionCommands::ConvertT);
     m_one_wire.write_byte(command);
 
@@ -98,12 +99,12 @@ bool Device::convert_t() {
     while (to_ms_since_boot(get_absolute_time()) - start_time < 1000) {
         bool value = m_one_wire.read_bit();
         if (value) {
-            return true;
+            return to_ms_since_boot(get_absolute_time()) - start_time;
         }
         sleep_ms(5);
     }
 
-    return false;
+    return std::nullopt;
 }
 
 bool Device::read_scratchpad() {
@@ -142,7 +143,7 @@ void Device::write_scratchpad(int8_t temperature_high, int8_t temperature_low, u
     m_one_wire.write_byte(configuration);
 }
 
-bool Device::copy_scratchpad() {
+std::optional<uint32_t> Device::copy_scratchpad() {
     uint8_t command = static_cast<uint8_t>(FunctionCommands::CopyScratchpad);
     m_one_wire.write_byte(command);
 
@@ -150,12 +151,12 @@ bool Device::copy_scratchpad() {
     while (to_ms_since_boot(get_absolute_time()) - start_time < 1000) {
         bool value = m_one_wire.read_bit();
         if (value) {
-            return true;
+            return to_ms_since_boot(get_absolute_time()) - start_time;
         }
         sleep_ms(1);
     }
 
-    return false;
+    return std::nullopt;
 }
 
 bool Device::read_power_supply() {

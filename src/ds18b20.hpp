@@ -14,7 +14,7 @@ private:
 
     static const int m_max_tries = 10;
 
-    void set_scratchpad(int8_t temperature_high_limit, int8_t temperature_low_limit, uint8_t configuration, bool save);
+    bool set_scratchpad(int8_t temperature_high_limit, int8_t temperature_low_limit, uint8_t configuration, bool save);
 
 public:
     Ds18b20(OneWire& one_wire, Rom rom);
@@ -25,17 +25,17 @@ public:
 
     bool is_valid();
 
-    float measure_temperature();
+    std::optional<float> measure_temperature();
 
     uint8_t get_resolution();
 
-    void set_resolution(Resolution resolution, bool save);
+    bool set_resolution(Resolution resolution, bool save);
 
     int8_t get_temperature_low_limit();
 
     int8_t get_temperature_high_limit();
 
-    void set_temperature_low_limit(int8_t temperature, bool save);
+    bool set_temperature_low_limit(int8_t temperature, bool save);
 
-    void set_temperature_high_limit(int8_t temperature, bool save);
+    bool set_temperature_high_limit(int8_t temperature, bool save);
 };
