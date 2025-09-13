@@ -69,7 +69,6 @@ For example:
 ## How to run
 
 - Download the [Embedded Temple Library (ETL)](https://github.com/ETLCPP/etl) and copy the `include` folder to the root of this project
-- Edit CMakeLists.txt and select the executable to run
 - Compile
   ```bash
   ninja -C /home/panagiotis/pico_projects/pico-ds18b20/build
