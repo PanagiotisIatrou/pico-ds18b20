@@ -73,6 +73,7 @@ For example:
   - Very High: 0.5°C steps
 - Detect alarm when temperature goes out of bounds
 - Set the low and high bounds of the temperature alarm range
+  - The range is [-128, 127] as integers
 - Revive a device after a disconnect
 
 ## Resources
