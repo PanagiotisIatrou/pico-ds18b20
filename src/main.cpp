@@ -20,28 +20,22 @@ int main()
     // Initialize a device on the data pin
     OneWire one_wire(data_pin);
     etl::vector<Ds18b20, 10> devices = Ds18b20::search_rom(one_wire);
-    if (devices.size() != 1) {
-        printf("?? Found %d devices\n", devices.size());
-        return 1;
-    }
-    Ds18b20 device = devices[0];
-    if (!device.is_valid()) {
-        printf("Could not initialize device");
-        return 1;
-    }
 
-    device.set_resolution(Resolution::VeryHigh, true);
+    for (int i = 0; i < devices.size(); i++) {
+        devices[i].set_resolution(Resolution::VeryHigh, true);
+    }
     while (true) {
-        float temperature = device.measure_temperature();
-        if (temperature == -1000.0) {
-            printf("Lost device\n");
-            while (!device.ping()) {
-                sleep_ms(500);
+        printf("| ");
+        for (int i = 0; i < devices.size(); i++) {
+            // devices[i].ping();
+            float temperature = devices[i].measure_temperature();
+            if (temperature == -1000.0) {
+                printf("x | ");
+            } else {
+                printf("%f | ", temperature);
             }
-            printf("Found again\n");
-        } else {
-            printf("%f\n", temperature);
         }
+        printf("\n");
     }
 
     fflush(stdout);

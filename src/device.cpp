@@ -70,29 +70,12 @@ void Device::match_rom() {
     m_one_wire.write_byte(rom.crc_code);
 }
 
-Rom Device::search_rom(OneWire& one_wire, uint64_t previous_sequence, int previous_sequence_length, bool send_new_bit, bool new_bit_choice) {
+Device::SearchRomInfo Device::search_rom(OneWire& one_wire, uint64_t previous_sequence, int previous_sequence_length) {
     one_wire.write_byte(0xF0);
 
-    // Set the previous sequence as the starting point
-    for (int i = 0; i < previous_sequence_length; i++) {
-        one_wire.read_bit();
-        one_wire.read_bit();
-        bool bit = (previous_sequence >> i) & 0b1;
-        one_wire.write_bit(bit);
-    }
-    uint64_t new_sequence = previous_sequence;
-
-    // Write the new bit
-    if (send_new_bit) {
-        one_wire.read_bit();
-        one_wire.read_bit();
-        new_sequence |= (new_bit_choice << previous_sequence_length);
-        one_wire.write_bit(new_bit_choice);
-    }
-
-    // Continue with the rest of the bits
-    const int bits_left = 64 - previous_sequence_length - send_new_bit;
-    for (int i = 0; i < bits_left; i++) {
+    SearchRomInfo info;
+    uint64_t new_sequence = 0;
+    for (int i = 0; i < 64; i++) {
         bool first_bit = one_wire.read_bit();
         bool second_bit = one_wire.read_bit();
         bool bit_choice;
@@ -101,22 +84,32 @@ Rom Device::search_rom(OneWire& one_wire, uint64_t previous_sequence, int previo
         } else if (first_bit && !second_bit) {
             bit_choice = 1;
         } else if (!first_bit && !second_bit){
-            bit_choice = 0;
+            if (i < previous_sequence_length) {
+                bit_choice = (previous_sequence >> i) & 0b1;
+            } else if (i == previous_sequence_length) {
+                bit_choice = 1;
+            } else {
+                bit_choice = 0;
+                info.last_choice_path = new_sequence;
+                info.last_choice_path_size = i;
+            }
         } else {
             printf("What\n");
         }
-        new_sequence |= ((uint64_t)bit_choice << (previous_sequence_length + i + send_new_bit));
+        new_sequence |= ((uint64_t)bit_choice << i);
         one_wire.write_bit(bit_choice);
     }
 
+    // Encode the rom
     Rom rom;
     rom.family_code = new_sequence & 0xFF;
     for (int i = 0; i < 6; i++) {
         rom.serial_number[5 - i] = (new_sequence >> (8 * (i + 1))) & 0xFF;
     }
     rom.crc_code = (new_sequence >> 56) & 0xFF;
+    info.rom = rom;
 
-    return rom;
+    return info;
 }
 
 bool Device::convert_t() {

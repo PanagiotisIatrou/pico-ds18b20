@@ -25,7 +25,13 @@ public:
 
     void match_rom();
 
-    static Rom search_rom(OneWire& one_wire, uint64_t previous_sequence, int previous_sequence_length, bool send_new_bit, bool new_bit_choice);
+    struct SearchRomInfo {
+        Rom rom;
+        uint64_t last_choice_path = 0;
+        int last_choice_path_size = -1;
+    };
+
+    static SearchRomInfo search_rom(OneWire& one_wire, uint64_t previous_sequence, int previous_sequence_length);
 
     // Function commands
 
