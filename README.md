@@ -65,7 +65,7 @@ For example:
 
 **See the examples folder for complete programs**
 
-Finds all the devices connected to GPIO 0
+Find all the ds18b20 devices connected to GPIO 0
 
 ```c++
 #include "one_wire.hpp"
@@ -106,6 +106,19 @@ bool success0 = device.set_temperature_low_limit(-20, true);
 bool success1 = device.set_temperature_high_limit(80, true);
 if (!success0 || !success1) {
     printf("Could not set temperature limits\n");
+}
+```
+
+Detect temperature alarms after temperature measurements
+
+```c++
+std::optional<float> result = device.measure_temperature();
+if (result.has_value()) {
+    if (device.is_alarm_active()) {
+        printf("ALARM!!!\n");
+    } else {
+        printf("All safe!\n");
+    }
 }
 ```
 
