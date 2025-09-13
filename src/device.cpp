@@ -73,7 +73,7 @@ void Device::match_rom() {
 Device::SearchRomInfo Device::search_rom(OneWire& one_wire, uint64_t previous_sequence, int previous_sequence_length) {
     one_wire.write_byte(0xF0);
 
-    SearchRomInfo info;
+    SearchRomInfo info = {};
     uint64_t new_sequence = 0;
     for (int i = 0; i < 64; i++) {
         bool first_bit = one_wire.read_bit();
@@ -94,7 +94,7 @@ Device::SearchRomInfo Device::search_rom(OneWire& one_wire, uint64_t previous_se
                 info.last_choice_path_size = i;
             }
         } else {
-            printf("What\n");
+            return {};
         }
         new_sequence |= ((uint64_t)bit_choice << i);
         one_wire.write_bit(bit_choice);
@@ -108,6 +108,14 @@ Device::SearchRomInfo Device::search_rom(OneWire& one_wire, uint64_t previous_se
     }
     rom.crc_code = (new_sequence >> 56) & 0xFF;
     info.rom = rom;
+
+    // Check rom CRC
+    uint8_t crc = 0;
+    crc = OneWire::calculate_crc_byte(crc, info.rom.family_code);
+    for (int i = 5; i >= 0; i--) {
+        crc = OneWire::calculate_crc_byte(crc, info.rom.serial_number[i]);
+    }
+    info.is_crc_valid = (crc == info.rom.crc_code);
 
     return info;
 }

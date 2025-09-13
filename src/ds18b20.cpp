@@ -29,7 +29,7 @@ Ds18b20::Ds18b20(OneWire& one_wire, Rom rom) : m_one_wire(one_wire), device(one_
 
 etl::vector<Ds18b20, 10> Ds18b20::search_rom(OneWire& one_wire) {
     etl::vector<Ds18b20, 10> devices;
-    Device::SearchRomInfo info;
+    Device::SearchRomInfo info{};
     info.last_choice_path_size = -2;
     while (info.last_choice_path_size != -1) {
         // Reset
@@ -45,7 +45,9 @@ etl::vector<Ds18b20, 10> Ds18b20::search_rom(OneWire& one_wire) {
         
         // Grab a ROM
         info = Device::search_rom(one_wire, info.last_choice_path, info.last_choice_path_size);
-        devices.emplace_back(Ds18b20(one_wire, info.rom));
+        if (info.rom != Rom{} && info.is_crc_valid) {
+            devices.emplace_back(Ds18b20(one_wire, info.rom));
+        }
     }
 
     printf("Found %d devices\n", devices.size());

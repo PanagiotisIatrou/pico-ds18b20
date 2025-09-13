@@ -29,6 +29,7 @@ public:
         Rom rom;
         uint64_t last_choice_path = 0;
         int last_choice_path_size = -1;
+        bool is_crc_valid = false;
     };
 
     static SearchRomInfo search_rom(OneWire& one_wire, uint64_t previous_sequence, int previous_sequence_length);

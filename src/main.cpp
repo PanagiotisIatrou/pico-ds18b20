@@ -20,6 +20,10 @@ int main()
     // Initialize a device on the data pin
     OneWire one_wire(data_pin);
     etl::vector<Ds18b20, 10> devices = Ds18b20::search_rom(one_wire);
+    if (devices.size() == 0) {
+        printf("Did not find any devices\n");
+        return 0;
+    }
 
     for (int i = 0; i < devices.size(); i++) {
         devices[i].set_resolution(Resolution::VeryHigh, true);

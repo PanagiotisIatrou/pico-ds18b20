@@ -23,3 +23,7 @@ inline bool operator==(const Rom& lhs, const Rom& rhs) {
 
     return true;
 }
+
+inline bool operator!=(const Rom& lhs, const Rom& rhs) {
+    return !(lhs == rhs);
+}
