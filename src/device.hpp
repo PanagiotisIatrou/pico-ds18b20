@@ -58,4 +58,8 @@ public:
     uint8_t get_config_setting();
 
     uint8_t resolution_to_configuration(Resolution resolution);
+
+    static uint64_t encode_rom(Rom encoded_rom);
+
+    static Rom decode_rom(uint64_t encoded_rom);
 };

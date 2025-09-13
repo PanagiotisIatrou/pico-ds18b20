@@ -24,6 +24,26 @@ uint8_t Device::resolution_to_configuration(Resolution resolution) {
     return 0b00011111 | ((uint8_t)resolution << 5);
 }
 
+uint64_t Device::encode_rom(Rom decoded_rom) {
+    uint64_t rom = 0;
+    rom |= ((uint64_t)decoded_rom.family_code);
+    for (int i = 0; i < 6; i++) {
+        rom |= (((uint64_t)decoded_rom.serial_number[5 - i]) << ((i + 1) * 8));
+    }
+    rom |= (((uint64_t)decoded_rom.crc_code) << 56);
+    return rom;
+}
+
+Rom Device::decode_rom(uint64_t encoded_rom) {
+    Rom rom;
+    rom.family_code = encoded_rom & 0xFF;
+    for (int i = 0; i < 6; i++) {
+        rom.serial_number[5 - i] = (encoded_rom >> (8 * (i + 1))) & 0xFF;
+    }
+    rom.crc_code = (encoded_rom >> 56) & 0xFF;
+    return rom;
+}
+
 void Device::skip_rom() {
     m_one_wire.write_byte(0xCC);
 }
@@ -100,14 +120,7 @@ Device::SearchRomInfo Device::search_rom(OneWire& one_wire, uint64_t previous_se
         one_wire.write_bit(bit_choice);
     }
 
-    // Encode the rom
-    Rom rom;
-    rom.family_code = new_sequence & 0xFF;
-    for (int i = 0; i < 6; i++) {
-        rom.serial_number[5 - i] = (new_sequence >> (8 * (i + 1))) & 0xFF;
-    }
-    rom.crc_code = (new_sequence >> 56) & 0xFF;
-    info.rom = rom;
+    info.rom = Device::decode_rom(new_sequence);
 
     // Check rom CRC
     uint8_t crc = 0;
