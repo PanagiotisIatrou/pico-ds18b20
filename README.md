@@ -77,3 +77,4 @@ For example:
 
 - [ds18b20 Analog datasheet](https://www.analog.com/media/en/technical-documentation/data-sheets/ds18b20.pdf)
 - [Book of iButton® Standards](https://www.analog.com/media/en/technical-documentation/tech-articles/book-of-ibuttonreg-standards.pdf)
+- [Application Note 187 | 1-Wire Search Algorithm](https://www.analog.com/media/en/technical-documentation/app-notes/1wire-search-algorithm.pdf)
