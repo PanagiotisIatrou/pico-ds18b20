@@ -39,5 +39,5 @@ public:
 
     bool is_alarm_active();
 
-    static etl::vector<Ds18b20, 10> search_rom(OneWire& one_wire);
+    static etl::vector<Ds18b20, 10> find_devices(OneWire& one_wire);
 };

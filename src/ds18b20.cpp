@@ -25,7 +25,7 @@ Ds18b20::Ds18b20(OneWire& one_wire, Rom rom) : m_one_wire(one_wire), device(one_
     m_is_valid = true;
 }
 
-etl::vector<Ds18b20, 10> Ds18b20::search_rom(OneWire& one_wire) {
+etl::vector<Ds18b20, 10> Ds18b20::find_devices(OneWire& one_wire) {
     etl::vector<Ds18b20, 10> devices;
     Device::SearchInfo info{};
     info.last_choice_path_size = -2;
