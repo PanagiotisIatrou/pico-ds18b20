@@ -1,15 +1,12 @@
 #include <stdio.h>
 #include "pico/stdlib.h"
 
-#include "rom.hpp"
 #include "one_wire.hpp"
 #include "ds18b20.hpp"
 
-const int data_pin = 0;
-
 int main()
 {
-    // Enable stdio
+    // Enable stdio and wait for serial monitor to connect
     stdio_init_all();
     while (!stdio_usb_connected()) {
         tight_loop_contents();
@@ -17,9 +14,9 @@ int main()
     sleep_ms(1000);
     printf("Starting...\n");
 
-    // Initialize a device on the data pin
-    OneWire one_wire(data_pin);
-    etl::vector<Ds18b20, 10> devices = Ds18b20::search_rom(one_wire);
+    // Find all the devices on the data pin (0)
+    OneWire one_wire(0);
+    etl::vector<Ds18b20, 10> devices = Ds18b20::find_devices(one_wire);
     if (devices.size() == 0) {
         printf("Did not find any devices\n");
         return 0;
