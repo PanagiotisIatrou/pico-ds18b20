@@ -7,9 +7,9 @@
 class Ds18b20 : public Device {
 private:
     OneWire& m_one_wire;
-    
-    bool m_is_valid;
 
+    bool is_initialized;
+    
     static const int m_max_tries = 10;
 
     bool set_scratchpad(int8_t temperature_high_limit, int8_t temperature_low_limit, uint8_t configuration, bool save);
@@ -17,9 +17,9 @@ private:
 public:
     Ds18b20(OneWire& one_wire, Rom rom);
 
-    bool ping();
+    bool is_successfully_initialized();
 
-    bool is_valid();
+    bool ping();
 
     std::optional<float> measure_temperature();
 

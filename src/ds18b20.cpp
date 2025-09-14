@@ -4,7 +4,6 @@
 
 Ds18b20::Ds18b20(OneWire& one_wire, Rom rom) : m_one_wire(one_wire), Device(one_wire, rom) {
     // Read the scratchpad
-    bool ok = false;
     for (int t = 0; t < m_max_tries; t++) {
         if (!m_one_wire.reset()) {
             continue;
@@ -14,15 +13,15 @@ Ds18b20::Ds18b20(OneWire& one_wire, Rom rom) : m_one_wire(one_wire), Device(one_
             continue;
         }
 
-        ok = true;
-        break;
-    }
-    if (!ok) {
-        m_is_valid = false;
+        is_initialized = true;
         return;
     }
 
-    m_is_valid = true;
+    is_initialized = false;
+}
+
+bool Ds18b20::is_successfully_initialized() {
+    return is_initialized;
 }
 
 etl::vector<Ds18b20, 10> Ds18b20::find_devices(OneWire& one_wire) {
@@ -45,7 +44,10 @@ etl::vector<Ds18b20, 10> Ds18b20::find_devices(OneWire& one_wire) {
         auto result = Device::search_rom(one_wire, info.last_choice_path, info.last_choice_path_size);
         if (result.has_value()) {
             info = result.value();
-            devices.emplace_back(Ds18b20(one_wire, info.rom));
+            Ds18b20 device(one_wire, info.rom);
+            if (device.is_successfully_initialized()) {
+                devices.emplace_back(device);
+            }
         }
     }
 
@@ -85,19 +87,10 @@ bool Ds18b20::ping() {
         break;
     }
 
-    m_is_valid = ok;
     return ok;
 }
 
-bool Ds18b20::is_valid() {
-    return m_is_valid;
-}
-
 std::optional<float> Ds18b20::measure_temperature() {
-    if (!m_is_valid) {
-        return std::nullopt;
-    }
-
     // Request a temperature measurement
     bool ok = false;
     for (int t = 0; t < m_max_tries; t++) {
@@ -113,7 +106,6 @@ std::optional<float> Ds18b20::measure_temperature() {
         break;
     }
     if (!ok) {
-        m_is_valid = false;
         return std::nullopt;
     }
 
@@ -132,7 +124,6 @@ std::optional<float> Ds18b20::measure_temperature() {
         break;
     }
     if (!ok) {
-        m_is_valid = false;
         return std::nullopt;
     }
 
@@ -141,9 +132,6 @@ std::optional<float> Ds18b20::measure_temperature() {
 }
 
 uint8_t Ds18b20::get_resolution() {
-    if (!m_is_valid) {
-        return 0;
-    }
 
     return m_scratchpad.get_resolution();
 }
@@ -172,7 +160,6 @@ bool Ds18b20::set_scratchpad(int8_t temperature_high_limit, int8_t temperature_l
         break;
     }
     if (!ok) {
-        m_is_valid = false;
         return false;
     }
 
@@ -192,7 +179,6 @@ bool Ds18b20::set_scratchpad(int8_t temperature_high_limit, int8_t temperature_l
             break;
         }
         if (!ok) {
-            m_is_valid = false;
             return false;
         }
     }
@@ -201,9 +187,6 @@ bool Ds18b20::set_scratchpad(int8_t temperature_high_limit, int8_t temperature_l
 }
 
 bool Ds18b20::set_resolution(Resolution resolution, bool save) {
-    if (!m_is_valid) {
-        return false;
-    }
     uint8_t configuration = m_scratchpad.resolution_to_configuration(resolution);
     return set_scratchpad(m_scratchpad.get_temperature_high_limit(), m_scratchpad.get_temperature_low_limit(), configuration, save);
 }
@@ -217,18 +200,10 @@ int8_t Ds18b20::get_temperature_high_limit() {
 }
 
 bool Ds18b20::set_temperature_low_limit(int8_t temperature, bool save) {
-    if (!m_is_valid) {
-        return false;
-    }
-
     return set_scratchpad(m_scratchpad.get_temperature_high_limit(), temperature, m_scratchpad.get_configuration(), save);
 }
 
 bool Ds18b20::set_temperature_high_limit(int8_t temperature, bool save) {
-    if (!m_is_valid) {
-        return false;
-    }
-
     return set_scratchpad(temperature, m_scratchpad.get_temperature_low_limit(), m_scratchpad.get_configuration(), save);
 }
 

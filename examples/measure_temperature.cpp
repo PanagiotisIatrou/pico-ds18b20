@@ -35,7 +35,6 @@ int main()
     while (true) {
         printf("| ");
         for (int i = 0; i < devices.size(); i++) {
-            devices[i].ping();
             std::optional<float> result = devices[i].measure_temperature();
             if (result.has_value()) {
                 float temperature = result.value();

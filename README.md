@@ -137,17 +137,16 @@ if (result.has_value()) {
 }
 ```
 
-Revive a device after disconnect for whatever reason
+Check if a device is operational
 
 ```c++
-// device fails
 // ...
 
-bool success = device.ping();
-if (success) {
-    printf("Revived!\n");
+bool is_operational = device.ping();
+if (is_operational) {
+    printf("Fully operational!\n");
 } else {
-    printf("Still could not revive :(\n");
+    printf("Device not operating correctly\n");
 }
 ```
 
@@ -164,7 +163,7 @@ if (success) {
 - Detect alarm when temperature goes out of bounds
 - Set the low and high bounds of the temperature alarm range
   - The range is [-128, 127] as integers
-- Revive a device after a disconnect
+- Check if a device is operational
 
 ## Resources
 
