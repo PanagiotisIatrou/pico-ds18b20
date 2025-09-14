@@ -7,7 +7,7 @@
 #include "one_wire.hpp"
 
 class Device {
-public:
+protected:
     struct SearchInfo {
         Rom rom;
         uint64_t last_choice_path = 0;
@@ -19,12 +19,12 @@ private:
 
     static std::optional<Device::SearchInfo> search(OneWire& one_wire, uint64_t previous_sequence, int previous_sequence_length);
 
-public:
-    Device(OneWire& one_wire, Rom device_rom);
+protected:
+    Device(OneWire& one_wire, Rom rom);
 
-    Rom rom;
+    Rom m_rom;
 
-    Scratchpad scratchpad;
+    Scratchpad m_scratchpad;
 
     // ROM commands
 

@@ -2,15 +2,15 @@
 
 #include <stdio.h>
 
-Ds18b20::Ds18b20(OneWire& one_wire, Rom rom) : m_one_wire(one_wire), device(one_wire, rom) {
+Ds18b20::Ds18b20(OneWire& one_wire, Rom rom) : m_one_wire(one_wire), Device(one_wire, rom) {
     // Read the scratchpad
     bool ok = false;
     for (int t = 0; t < m_max_tries; t++) {
         if (!m_one_wire.reset()) {
             continue;
         }
-        device.match_rom();
-        if (!device.read_scratchpad()) {
+        match_rom();
+        if (!read_scratchpad()) {
             continue;
         }
 
@@ -58,14 +58,14 @@ bool Ds18b20::ping() {
     bool ok = false;
     for (int t = 0; t < m_max_tries; t++) {
         // Read the rom to see if it matches
-        uint64_t rom = Rom::encode_rom(device.rom);
+        uint64_t rom = Rom::encode_rom(m_rom);
         if (!m_one_wire.reset()) {
             continue;
         }
         auto result = Device::search_rom(m_one_wire, rom, 64);
         if (result.has_value()) {
             Device::SearchInfo info = result.value();
-            if (info.rom != device.rom) {
+            if (info.rom != m_rom) {
                 continue;
             }
         } else {
@@ -76,8 +76,8 @@ bool Ds18b20::ping() {
         if (!m_one_wire.reset()) {
             continue;
         }
-        device.match_rom();
-        if (!device.read_power_supply()) {
+        match_rom();
+        if (!read_power_supply()) {
             continue;
         }
 
@@ -104,8 +104,8 @@ std::optional<float> Ds18b20::measure_temperature() {
         if (!m_one_wire.reset()) {
             continue;
         }
-        device.match_rom();
-        if (!device.convert_t().has_value()) {
+        match_rom();
+        if (!convert_t().has_value()) {
             continue;
         }
 
@@ -123,8 +123,8 @@ std::optional<float> Ds18b20::measure_temperature() {
         if (!m_one_wire.reset()) {
             continue;
         }
-        device.match_rom();
-        if (!device.read_scratchpad()) {
+        match_rom();
+        if (!read_scratchpad()) {
             continue;
         }
 
@@ -137,7 +137,7 @@ std::optional<float> Ds18b20::measure_temperature() {
     }
 
     // Extract the temperature from the scratchpad
-    return device.scratchpad.calculate_temperature();
+    return m_scratchpad.calculate_temperature();
 }
 
 uint8_t Ds18b20::get_resolution() {
@@ -145,7 +145,7 @@ uint8_t Ds18b20::get_resolution() {
         return 0;
     }
 
-    return device.scratchpad.get_resolution();
+    return m_scratchpad.get_resolution();
 }
 
 bool Ds18b20::set_scratchpad(int8_t temperature_high_limit, int8_t temperature_low_limit, uint8_t configuration, bool save) {
@@ -156,15 +156,15 @@ bool Ds18b20::set_scratchpad(int8_t temperature_high_limit, int8_t temperature_l
         if (!m_one_wire.reset()) {
             continue;
         }
-        device.match_rom();
-        device.write_scratchpad(temperature_high_limit, temperature_low_limit, configuration);
+        match_rom();
+        write_scratchpad(temperature_high_limit, temperature_low_limit, configuration);
 
         // Read the scratchpad
         if (!m_one_wire.reset()) {
             continue;
         }
-        device.match_rom();
-        if (!device.read_scratchpad()) {
+        match_rom();
+        if (!read_scratchpad()) {
             continue;
         }
     
@@ -183,8 +183,8 @@ bool Ds18b20::set_scratchpad(int8_t temperature_high_limit, int8_t temperature_l
             if (!m_one_wire.reset()) {
                 continue;
             }
-            device.match_rom();
-            if (!device.copy_scratchpad().has_value()) {
+            match_rom();
+            if (!copy_scratchpad().has_value()) {
                 continue;
             }
 
@@ -204,16 +204,16 @@ bool Ds18b20::set_resolution(Resolution resolution, bool save) {
     if (!m_is_valid) {
         return false;
     }
-    uint8_t configuration = device.scratchpad.resolution_to_configuration(resolution);
-    return set_scratchpad(device.scratchpad.get_temperature_high_limit(), device.scratchpad.get_temperature_low_limit(), configuration, save);
+    uint8_t configuration = m_scratchpad.resolution_to_configuration(resolution);
+    return set_scratchpad(m_scratchpad.get_temperature_high_limit(), m_scratchpad.get_temperature_low_limit(), configuration, save);
 }
 
 int8_t Ds18b20::get_temperature_low_limit() {
-    return device.scratchpad.get_temperature_low_limit();
+    return m_scratchpad.get_temperature_low_limit();
 }
 
 int8_t Ds18b20::get_temperature_high_limit() {
-    return device.scratchpad.get_temperature_high_limit();
+    return m_scratchpad.get_temperature_high_limit();
 }
 
 bool Ds18b20::set_temperature_low_limit(int8_t temperature, bool save) {
@@ -221,7 +221,7 @@ bool Ds18b20::set_temperature_low_limit(int8_t temperature, bool save) {
         return false;
     }
 
-    return set_scratchpad(device.scratchpad.get_temperature_high_limit(), temperature, device.scratchpad.get_configuration(), save);
+    return set_scratchpad(m_scratchpad.get_temperature_high_limit(), temperature, m_scratchpad.get_configuration(), save);
 }
 
 bool Ds18b20::set_temperature_high_limit(int8_t temperature, bool save) {
@@ -229,19 +229,19 @@ bool Ds18b20::set_temperature_high_limit(int8_t temperature, bool save) {
         return false;
     }
 
-    return set_scratchpad(temperature, device.scratchpad.get_temperature_low_limit(), device.scratchpad.get_configuration(), save);
+    return set_scratchpad(temperature, m_scratchpad.get_temperature_low_limit(), m_scratchpad.get_configuration(), save);
 }
 
 bool Ds18b20::is_alarm_active() {
     for (int t = 0; t < m_max_tries; t++) {
-        uint64_t rom = Rom::encode_rom(device.rom);
+        uint64_t rom = Rom::encode_rom(m_rom);
         if (!m_one_wire.reset()) {
             continue;
         }
         auto result = Device::search_alarm(m_one_wire, rom, 64);
         if (result.has_value()) {
             Device::SearchInfo info = result.value();
-            if (info.rom == device.rom) {
+            if (info.rom == m_rom) {
                 return true;
             } else {
                 return false;

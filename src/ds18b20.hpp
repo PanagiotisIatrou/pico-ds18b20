@@ -4,10 +4,8 @@
 
 #include "etl/vector.h"
 
-class Ds18b20 {
+class Ds18b20 : public Device {
 private:
-    Device device;
-
     OneWire& m_one_wire;
     
     bool m_is_valid;

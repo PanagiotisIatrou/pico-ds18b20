@@ -6,8 +6,8 @@
 
 #include "common.hpp"
 
-Device::Device(OneWire& one_wire, Rom device_rom) : m_one_wire(one_wire) {
-    rom = device_rom;
+Device::Device(OneWire& one_wire, Rom rom) : m_one_wire(one_wire) {
+    m_rom = rom;
 }
 
 void Device::skip_rom() {
@@ -41,15 +41,15 @@ void Device::match_rom() {
     m_one_wire.write_byte(command);
 
     // Send family code
-    m_one_wire.write_byte(rom.get_family_code());
+    m_one_wire.write_byte(m_rom.get_family_code());
 
     // Send serial number
     for (int i = 0; i < 6; i++) {
-        m_one_wire.write_byte(rom.get_serial_number(i));
+        m_one_wire.write_byte(m_rom.get_serial_number(i));
     }
 
     // Send CRC code
-    m_one_wire.write_byte(rom.get_crc_code());
+    m_one_wire.write_byte(m_rom.get_crc_code());
 }
 
 std::optional<Device::SearchInfo> Device::search(OneWire& one_wire, uint64_t previous_sequence, int previous_sequence_length) {
@@ -135,10 +135,10 @@ bool Device::read_scratchpad() {
         reserved[i] = m_one_wire.read_byte();
     }
     uint8_t crc_code = m_one_wire.read_byte();
-    scratchpad = Scratchpad(temperature, temperature_high_limit, temperature_low_limit, configuration, reserved, crc_code);
+    m_scratchpad = Scratchpad(temperature, temperature_high_limit, temperature_low_limit, configuration, reserved, crc_code);
 
     // Check Scratchpad CRC
-    if (!scratchpad.has_valid_crc()) {
+    if (!m_scratchpad.has_valid_crc()) {
         return false;
     }
 
