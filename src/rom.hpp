@@ -28,8 +28,8 @@ public:
     uint8_t get_family_code();
 
     /**
-     * @param index The index of the 6 bytes of the serial number (index 0 is the LSB)
-     * @return The 48-bit serial number of the device.
+     * @param index The index of the byte of the serial number (index 0 is the LSB)
+     * @return The index-th byte of the serial number of the device.
      */
     uint8_t get_serial_number(int index);
 
@@ -52,12 +52,14 @@ public:
     bool has_valid_crc();
 
     /**
+     * Turns a Rom object into uint64_t
      * @param decoded_rom A Rom object
      * @return The 64-bit representation of decoded_rom
      */
     static uint64_t encode_rom(Rom decoded_rom);
 
     /**
+     * Turns uint64_t into a Rom object
      * @param encoded_rom A 64-bit representation of a Rom
      * @return The Rom object representation of encoded_rom
      */
