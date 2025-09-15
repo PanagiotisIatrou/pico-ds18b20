@@ -20,7 +20,7 @@ private:
      * Extracts the 2 important bits from the configuration indicating the resolution.
      * @return 0, 1, 2 or 3, indicating 9, 10, 11 or 12 bit resolution.
      */
-    uint8_t get_config_setting();
+    uint8_t get_config_setting() const;
 
 public:
     /**
@@ -43,33 +43,33 @@ public:
      * @param index The index of the byte to return.
      * @return the index-th byte of the temperature measurement.
      */
-    uint8_t get_temperature_byte(int index);
+    uint8_t get_temperature_byte(int index) const;
 
     /**
      * @return The upper temperature limit for triggering the alarm.
      */
-    int8_t get_temperature_high_limit();
+    int8_t get_temperature_high_limit() const;
 
     /**
      * @return The lower temperature limit for triggering the alarm.
      */
-    int8_t get_temperature_low_limit();
+    int8_t get_temperature_low_limit() const;
 
     /**
      * @return The configuration byte containing the resolution.
      */
-    uint8_t get_configuration();
+    uint8_t get_configuration() const;
 
     /**
      * @return The CRC code of the Scratchpad.
      */
-    uint8_t get_crc_code();
+    uint8_t get_crc_code() const;
 
     /**
      * Converts the 2 bytes of the temperature measurement to a float number.
      * @return The temperature measurement in a readable format.
      */
-    float calculate_temperature();
+    float calculate_temperature() const;
 
     /**
      * Converts the given resolution to a configuration byte.
@@ -77,18 +77,18 @@ public:
      * @param resolution A setting for 9, 10, 11 or 12 bit resolution.
      * @return A byte containing 2 bytes indicating the specified resolution.
      */
-    uint8_t resolution_to_configuration(Resolution resolution);
+    uint8_t resolution_to_configuration(Resolution resolution) const;
 
     /**
      * Extracts the resolution from the configuration byte
      * @return The resolution (9, 10, 11 or 12).
      */
-    int get_resolution();
+    int get_resolution() const;
 
     /**
      * Calculates the CRC code from the temperature, temperature_high_limit, temperature_low_limit,
      * configuration and reserved and checks if it matches the Rom CRC code.
      * @return true if the match, false if not.
      */
-    bool has_valid_crc();
+    bool has_valid_crc() const;
 };

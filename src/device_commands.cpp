@@ -6,12 +6,12 @@
 
 #include "common.hpp"
 
-void DeviceCommands::skip_rom(OneWire& one_wire) {
+void DeviceCommands::skip_rom(const OneWire& one_wire) {
     uint8_t command = static_cast<uint8_t>(RomCommands::SkipRom);
     one_wire.write_byte(command);
 }
 
-std::optional<Rom> DeviceCommands::read_rom(OneWire& one_wire) {
+std::optional<Rom> DeviceCommands::read_rom(const OneWire& one_wire) {
     uint8_t command = static_cast<uint8_t>(RomCommands::ReadRom);
     one_wire.write_byte(command);
 
@@ -32,7 +32,7 @@ std::optional<Rom> DeviceCommands::read_rom(OneWire& one_wire) {
     }
 }
 
-void DeviceCommands::match_rom(OneWire& one_wire, Rom& rom) {
+void DeviceCommands::match_rom(const OneWire& one_wire, const Rom& rom) {
     uint8_t command = static_cast<uint8_t>(RomCommands::MatchRom);
     one_wire.write_byte(command);
 
@@ -48,7 +48,7 @@ void DeviceCommands::match_rom(OneWire& one_wire, Rom& rom) {
     one_wire.write_byte(rom.get_crc_code());
 }
 
-std::optional<DeviceCommands::SearchInfo> DeviceCommands::search(OneWire& one_wire, uint64_t previous_sequence, int previous_sequence_length) {
+std::optional<DeviceCommands::SearchInfo> DeviceCommands::search(const OneWire& one_wire, uint64_t previous_sequence, int previous_sequence_length) {
     SearchInfo info = {};
     uint64_t new_sequence = 0;
     for (int i = 0; i < 64; i++) {
@@ -84,21 +84,21 @@ std::optional<DeviceCommands::SearchInfo> DeviceCommands::search(OneWire& one_wi
     }
 }
 
-std::optional<DeviceCommands::SearchInfo> DeviceCommands::search_rom(OneWire& one_wire, uint64_t previous_sequence, int previous_sequence_length) {
+std::optional<DeviceCommands::SearchInfo> DeviceCommands::search_rom(const OneWire& one_wire, uint64_t previous_sequence, int previous_sequence_length) {
     uint8_t command = static_cast<uint8_t>(RomCommands::SearchRom);
     one_wire.write_byte(command);
 
     return search(one_wire, previous_sequence, previous_sequence_length);
 }
 
-std::optional<DeviceCommands::SearchInfo> DeviceCommands::search_alarm(OneWire& one_wire, uint64_t previous_sequence, int previous_sequence_length) {
+std::optional<DeviceCommands::SearchInfo> DeviceCommands::search_alarm(const OneWire& one_wire, uint64_t previous_sequence, int previous_sequence_length) {
     uint8_t command = static_cast<uint8_t>(RomCommands::SearchAlarm);
     one_wire.write_byte(command);
 
     return search(one_wire, previous_sequence, previous_sequence_length);
 }
 
-std::optional<uint32_t> DeviceCommands::convert_t(OneWire& one_wire) {
+std::optional<uint32_t> DeviceCommands::convert_t(const OneWire& one_wire) {
     uint8_t command = static_cast<uint8_t>(FunctionCommands::ConvertT);
     one_wire.write_byte(command);
 
@@ -114,7 +114,7 @@ std::optional<uint32_t> DeviceCommands::convert_t(OneWire& one_wire) {
     return std::nullopt;
 }
 
-std::optional<Scratchpad> DeviceCommands::read_scratchpad(OneWire& one_wire) {
+std::optional<Scratchpad> DeviceCommands::read_scratchpad(const OneWire& one_wire) {
     uint8_t command = static_cast<uint8_t>(FunctionCommands::ReadScratchpad);
     one_wire.write_byte(command);
 
@@ -141,7 +141,7 @@ std::optional<Scratchpad> DeviceCommands::read_scratchpad(OneWire& one_wire) {
     }
 }
 
-void DeviceCommands::write_scratchpad(OneWire& one_wire, int8_t temperature_high, int8_t temperature_low, uint8_t configuration) {
+void DeviceCommands::write_scratchpad(const OneWire& one_wire, int8_t temperature_high, int8_t temperature_low, uint8_t configuration) {
     uint8_t command = static_cast<uint8_t>(FunctionCommands::WriteScratchpad);
     one_wire.write_byte(command);
 
@@ -150,7 +150,7 @@ void DeviceCommands::write_scratchpad(OneWire& one_wire, int8_t temperature_high
     one_wire.write_byte(configuration);
 }
 
-std::optional<uint32_t> DeviceCommands::copy_scratchpad(OneWire& one_wire) {
+std::optional<uint32_t> DeviceCommands::copy_scratchpad(const OneWire& one_wire) {
     uint8_t command = static_cast<uint8_t>(FunctionCommands::CopyScratchpad);
     one_wire.write_byte(command);
 
@@ -166,7 +166,7 @@ std::optional<uint32_t> DeviceCommands::copy_scratchpad(OneWire& one_wire) {
     return std::nullopt;
 }
 
-PowerSupplyMode DeviceCommands::read_power_supply_mode(OneWire& one_wire) {
+PowerSupplyMode DeviceCommands::read_power_supply_mode(const OneWire& one_wire) {
     uint8_t command = static_cast<uint8_t>(FunctionCommands::ReadPowerSupply);
     one_wire.write_byte(command);
 

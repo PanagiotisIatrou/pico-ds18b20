@@ -28,27 +28,27 @@ Scratchpad::Scratchpad(uint8_t temperature[2], int8_t temperature_high_limit, in
     m_crc_code = crc_code;
 }
 
-uint8_t Scratchpad::get_temperature_byte(int index) {
+uint8_t Scratchpad::get_temperature_byte(int index) const {
     return m_temperature[index];
 }
 
-int8_t Scratchpad::get_temperature_high_limit() {
+int8_t Scratchpad::get_temperature_high_limit() const {
     return m_temperature_high_limit;
 }
 
-int8_t Scratchpad::get_temperature_low_limit() {
+int8_t Scratchpad::get_temperature_low_limit() const {
     return m_temperature_low_limit;
 }
 
-uint8_t Scratchpad::get_configuration() {
+uint8_t Scratchpad::get_configuration() const {
     return m_configuration;
 }
 
-uint8_t Scratchpad::get_crc_code() {
+uint8_t Scratchpad::get_crc_code() const {
     return m_crc_code;
 }
 
-float Scratchpad::calculate_temperature() {
+float Scratchpad::calculate_temperature() const {
     uint8_t config_setting = get_config_setting();
     int16_t temperature_data = m_temperature[0] + (m_temperature[1] << 8);
     temperature_data = temperature_data >> (3 - config_setting);
@@ -56,19 +56,19 @@ float Scratchpad::calculate_temperature() {
     return temperature;
 }
 
-uint8_t Scratchpad::get_config_setting() {
+uint8_t Scratchpad::get_config_setting() const {
     return (m_configuration & 0b01100000) >> 5;
 }
 
-uint8_t Scratchpad::resolution_to_configuration(Resolution resolution) {
+uint8_t Scratchpad::resolution_to_configuration(Resolution resolution) const {
     return 0b00011111 | ((uint8_t)resolution << 5);
 }
 
-int Scratchpad::get_resolution() {
+int Scratchpad::get_resolution() const {
     return 9 + get_config_setting();
 }
 
-bool Scratchpad::has_valid_crc() {
+bool Scratchpad::has_valid_crc() const {
     uint8_t crc = 0;
     for (int i = 0; i < 2; i++) {
         crc = OneWire::calculate_crc_byte(crc, m_temperature[i]);

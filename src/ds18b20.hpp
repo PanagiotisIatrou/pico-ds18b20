@@ -39,14 +39,14 @@ public:
     /**
      * @return True if the device initialized correctly, false if not.
      */
-    bool is_successfully_initialized();
+    bool is_successfully_initialized() const;
 
     /**
      * Pings the device to check if it is operational. This is done by reading its Rom and seeing if it matches
      * with the one it was initialized with.
      * @return True if the device is operational, false if not.
      */
-    bool ping();
+    bool ping() const;
 
     /**
      * Conducts a temperature measurement on the device.
@@ -58,7 +58,7 @@ public:
     /**
      * @return The resolution of the temperature measurements.
      */
-    Resolution get_resolution();
+    Resolution get_resolution() const;
 
     /**
      * Sets the resolution of the temperature measurements. Also, writes the value to the EEPROM if specified.
@@ -70,12 +70,12 @@ public:
     /**
      * @return The lower temperature limit for triggering the alarm.
      */
-    int8_t get_temperature_low_limit();
+    int8_t get_temperature_low_limit() const;
 
     /**
      * @return The upper temperature limit for triggering the alarm.
      */
-    int8_t get_temperature_high_limit();
+    int8_t get_temperature_high_limit() const;
 
     /**
      * Sets the lower temperature limit for triggering the alarm. Also, writes the value to the EEPROM if specified.
@@ -94,14 +94,14 @@ public:
      * was out of bounds (out of the specified limits).
      * @return True if the last temperature was out of the specified limits, false if not.
      */
-    bool is_alarm_active();
+    bool is_alarm_active() const;
 
     /**
      * Reads the power supply mode of the device.
      * @return If the read is successful, the power supply mode (External or Parasite) is returned. If it
      * failed, std::nullopt is returned.
      */
-    std::optional<PowerSupplyMode> get_power_supply_mode();
+    std::optional<PowerSupplyMode> get_power_supply_mode() const;
 
     /**
      * Scans the GPIO pin specified in the OneWire object for connected devices. There can be more than one in a specific GPIO,

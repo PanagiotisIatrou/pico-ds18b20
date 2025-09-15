@@ -28,31 +28,31 @@ public:
     /**
      * @return The family code of the device.
      */
-    uint8_t get_family_code();
+    uint8_t get_family_code() const;
 
     /**
      * @param index The index of the byte of the serial number (index 0 is the LSB)
      * @return The index-th byte of the serial number of the device.
      */
-    uint8_t get_serial_number(int index);
+    uint8_t get_serial_number(int index) const;
 
     /**
      * @return The CRC code of the Rom.
      */
-    uint8_t get_crc_code();
+    uint8_t get_crc_code() const;
 
     /**
      * Checks if the Rom contains all zeros.
      * @return true if all zeros, false if not.
      */
-    bool is_empty();
+    bool is_empty() const;
 
     /**
      * Calculates the CRC code from the family code and the serial number and checks if
      * it matches the Rom CRC code.
      * @return true if the match, false if not.
      */
-    bool has_valid_crc();
+    bool has_valid_crc() const;
 
     /**
      * Turns a Rom object into uint64_t
@@ -90,7 +90,7 @@ public:
     /**
      * Checks if 2 Roms are not equal
      */
-    bool operator!=(const Rom& other) {
+    bool operator!=(const Rom& other) const {
         return !(*this == other);
     }
 };

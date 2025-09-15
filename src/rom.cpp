@@ -18,19 +18,19 @@ Rom::Rom(uint8_t family_code, uint8_t serial_number[6], uint8_t crc_code) {
     m_crc_code = crc_code;
 }
 
-uint8_t Rom::get_family_code() {
+uint8_t Rom::get_family_code() const {
     return m_family_code;
 }
 
-uint8_t Rom::get_serial_number(int index) {
+uint8_t Rom::get_serial_number(int index) const {
     return m_serial_number[index];
 }
 
-uint8_t Rom::get_crc_code() {
+uint8_t Rom::get_crc_code() const {
     return m_crc_code;
 }
 
-bool Rom::is_empty() {
+bool Rom::is_empty() const {
     if (m_family_code != 0) {
         return false;
     }
@@ -46,7 +46,7 @@ bool Rom::is_empty() {
     return true;
 }
 
-bool Rom::has_valid_crc() {
+bool Rom::has_valid_crc() const {
     uint8_t crc = 0;
     crc = OneWire::calculate_crc_byte(crc, m_family_code);
     for (int i = 0; i < 6; i++) {

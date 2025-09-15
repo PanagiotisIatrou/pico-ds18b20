@@ -13,13 +13,13 @@ private:
      * Reads whether the data pin is set to low or high.
      * @return The value of the data pin.
      */
-    bool get_pin_value();
+    bool get_pin_value() const;
 
     /**
      * Sets the value of the data pin to the value parameter
      * @param value
      */
-    void set_pin_value(bool value);
+    void set_pin_value(bool value) const;
 
     /**
      * Waits until the value of the data pin is equal to the bit parameter or until max_time_us microseconds
@@ -28,7 +28,7 @@ private:
      * @param max_time_us The maximum amount of microseconds to wait.
      * @return True if the data pin turned equal to the bit parameter within max_time_us microseconds, false if not.
      */
-    bool wait_us_for_bit(bool bit, int max_time_us);
+    bool wait_us_for_bit(bool bit, int max_time_us) const;
 
     /**
      * Waits until the value of the data pin is equal to the bit parameter or until max_time_us milliseconds
@@ -37,7 +37,7 @@ private:
      * @param max_time_us The maximum amount of milliseconds to wait.
      * @return True if the data pin turned equal to the bit parameter within max_time_us milliseconds, false if not.
      */
-    bool wait_ms_for_bit(bool bit, int max_time_ms);
+    bool wait_ms_for_bit(bool bit, int max_time_ms) const;
 
 public:
     /**
@@ -51,25 +51,25 @@ public:
      * Issues a write slot and writes the given bit to the bus.
      * @param value The value to write to the bus.
      */
-    void write_bit(bool value);
+    void write_bit(bool value) const;
 
     /**
      * Issues a read slot and reads the value of the bus.
      * @return The value of the bus in this read slot.
      */
-    bool read_bit();
+    bool read_bit() const;
 
     /**
      * Issues 8 write slots and writes the given byte to the bus.
      * @param value 8-bits of data to be sent. LSB first (LSB is the rightmost bit).
      */
-    void write_byte(uint8_t value);
+    void write_byte(uint8_t value) const;
 
     /**
      * Issues 8 read slots and reads the value of the bus.
      * @return The 8-bits of data that were read. LSB first (LSB is the rightmost bit).
      */
-    uint8_t read_byte();
+    uint8_t read_byte() const;
 
     /**
      * Calcualtes the new CRC value, taking the byte parameter into the CRC calculation.

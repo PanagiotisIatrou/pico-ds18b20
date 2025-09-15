@@ -7,15 +7,15 @@ OneWire::OneWire(int data_pin) : m_data_pin(data_pin) {
     gpio_pull_up(data_pin);
 }
 
-bool OneWire::get_pin_value() {
+bool OneWire::get_pin_value() const {
     return gpio_get(m_data_pin);
 }
 
-void OneWire::set_pin_value(bool value) {
+void OneWire::set_pin_value(bool value) const {
     gpio_put(m_data_pin, value);
 }
 
-void OneWire::write_bit(bool value) {
+void OneWire::write_bit(bool value) const {
     gpio_set_dir(m_data_pin, GPIO_OUT);
     gpio_put(m_data_pin, 0);
     if (value) {
@@ -29,7 +29,7 @@ void OneWire::write_bit(bool value) {
     sleep_us(5);
 }
 
-bool OneWire::read_bit() {
+bool OneWire::read_bit() const {
     gpio_set_dir(m_data_pin, GPIO_OUT);
     gpio_put(m_data_pin, 0);
     sleep_us(5);
@@ -41,14 +41,14 @@ bool OneWire::read_bit() {
     return data;
 }
 
-void OneWire::write_byte(uint8_t value) {
+void OneWire::write_byte(uint8_t value) const {
     for (int i = 0; i < 8; i++) {
         bool bit = (value >> i) & 0x01;
         write_bit(bit);
     }
 }
 
-uint8_t OneWire::read_byte() {
+uint8_t OneWire::read_byte() const {
     uint8_t byte = 0;
     for (int i = 0; i < 8; i++) {
         byte |= (read_bit() << i);
@@ -57,7 +57,7 @@ uint8_t OneWire::read_byte() {
     return byte;
 }
 
-bool OneWire::wait_us_for_bit(bool bit, int max_time_us) {
+bool OneWire::wait_us_for_bit(bool bit, int max_time_us) const {
     uint32_t start_time = to_us_since_boot(get_absolute_time());
     while (to_us_since_boot(get_absolute_time()) - start_time < max_time_us) {
         if (gpio_get(m_data_pin) == bit) {
@@ -70,7 +70,7 @@ bool OneWire::wait_us_for_bit(bool bit, int max_time_us) {
     return false;
 }
 
-bool OneWire::wait_ms_for_bit(bool bit, int max_time_ms) {
+bool OneWire::wait_ms_for_bit(bool bit, int max_time_ms) const {
     return wait_us_for_bit(bit, max_time_ms * 1000);
 }
 

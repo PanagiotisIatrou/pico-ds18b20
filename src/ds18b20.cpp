@@ -34,7 +34,7 @@ Ds18b20::Ds18b20(OneWire& one_wire, Rom rom) : m_one_wire(one_wire) {
     is_initialized = true;
 }
 
-bool Ds18b20::is_successfully_initialized() {
+bool Ds18b20::is_successfully_initialized() const {
     return is_initialized;
 }
 
@@ -72,7 +72,7 @@ etl::vector<Ds18b20, 10> Ds18b20::find_devices(OneWire& one_wire) {
     return devices;
 }
 
-bool Ds18b20::ping() {
+bool Ds18b20::ping() const {
     bool ok = false;
     for (int t = 0; t < m_max_tries; t++) {
         // Read the rom to see if it matches
@@ -148,7 +148,7 @@ std::optional<float> Ds18b20::measure_temperature() {
     return m_scratchpad.calculate_temperature();
 }
 
-Resolution Ds18b20::get_resolution() {
+Resolution Ds18b20::get_resolution() const {
     switch (m_scratchpad.get_resolution()) {
         case 9: {
             return Resolution::Low;
@@ -230,11 +230,11 @@ bool Ds18b20::set_resolution(Resolution resolution, bool save) {
     return set_scratchpad(m_scratchpad.get_temperature_high_limit(), m_scratchpad.get_temperature_low_limit(), configuration, save);
 }
 
-int8_t Ds18b20::get_temperature_low_limit() {
+int8_t Ds18b20::get_temperature_low_limit() const {
     return m_scratchpad.get_temperature_low_limit();
 }
 
-int8_t Ds18b20::get_temperature_high_limit() {
+int8_t Ds18b20::get_temperature_high_limit() const {
     return m_scratchpad.get_temperature_high_limit();
 }
 
@@ -246,7 +246,7 @@ bool Ds18b20::set_temperature_high_limit(int8_t temperature, bool save) {
     return set_scratchpad(temperature, m_scratchpad.get_temperature_low_limit(), m_scratchpad.get_configuration(), save);
 }
 
-bool Ds18b20::is_alarm_active() {
+bool Ds18b20::is_alarm_active() const {
     for (int t = 0; t < m_max_tries; t++) {
         uint64_t rom = Rom::encode_rom(m_rom);
         if (!m_one_wire.reset()) {
@@ -268,7 +268,7 @@ bool Ds18b20::is_alarm_active() {
     return false;
 }
 
-std::optional<PowerSupplyMode> Ds18b20::get_power_supply_mode() {
+std::optional<PowerSupplyMode> Ds18b20::get_power_supply_mode() const {
     bool ok = false;
     for (int t = 0; t < m_max_tries; t++) {
         if (!m_one_wire.reset()) {
