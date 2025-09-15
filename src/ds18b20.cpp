@@ -131,9 +131,25 @@ std::optional<float> Ds18b20::measure_temperature() {
     return m_scratchpad.calculate_temperature();
 }
 
-uint8_t Ds18b20::get_resolution() {
-
-    return m_scratchpad.get_resolution();
+Resolution Ds18b20::get_resolution() {
+    switch (m_scratchpad.get_resolution()) {
+        case 9: {
+            return Resolution::Low;
+            break;
+        }
+        case 10: {
+            return Resolution::Medium;
+            break;
+        }
+        case 11: {
+            return Resolution::High;
+            break;
+        }
+        case 12: {
+            return Resolution::VeryHigh;
+            break;
+        }
+    }
 }
 
 bool Ds18b20::set_scratchpad(int8_t temperature_high_limit, int8_t temperature_low_limit, uint8_t configuration, bool save) {

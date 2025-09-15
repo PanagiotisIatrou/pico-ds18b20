@@ -23,7 +23,7 @@ public:
 
     std::optional<float> measure_temperature();
 
-    uint8_t get_resolution();
+    Resolution get_resolution();
 
     bool set_resolution(Resolution resolution, bool save);
 
