@@ -62,6 +62,8 @@ etl::vector<Ds18b20, 10> Ds18b20::find_devices(OneWire& one_wire) {
             if (device.is_successfully_initialized()) {
                 devices.emplace_back(device);
             }
+        } else {
+            break;
         }
     }
 
