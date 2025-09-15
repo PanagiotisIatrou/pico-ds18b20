@@ -3,7 +3,7 @@
 #include <stdint.h>
 
 /**
- * Contains functionality for accessing the Rom contained in each ds18b20
+ * Contains functionality for accessing the 64-bit Rom contained in each ds18b20
  */
 class Rom {
 private:
