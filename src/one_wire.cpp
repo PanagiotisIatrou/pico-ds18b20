@@ -7,14 +7,14 @@ OneWire::OneWire(int data_pin) : m_data_pin(data_pin) {
     gpio_pull_up(data_pin);
 }
 
+OneWireState OneWire::get_state() {
+    return m_state;
+}
+
 void OneWire::set_state(OneWireState state) {
     state = state;
     bool gpio_state = state == OneWireState::READ ? GPIO_IN : GPIO_OUT;
     gpio_set_dir(m_data_pin, gpio_state);
-}
-
-OneWireState OneWire::get_state() {
-    return m_state;
 }
 
 bool OneWire::get_pin_value() {
