@@ -45,7 +45,7 @@ etl::vector<Ds18b20, 10> Ds18b20::find_devices(OneWire& one_wire) {
         }
         
         // Grab a ROM
-        auto result = DeviceCommands::search_rom(one_wire, info.last_choice_path, info.last_choice_path_size);
+        std::optional<DeviceCommands::SearchInfo> result = DeviceCommands::search_rom(one_wire, info.last_choice_path, info.last_choice_path_size);
         if (result.has_value()) {
             info = result.value();
             Ds18b20 device(one_wire, info.rom);
@@ -68,7 +68,7 @@ bool Ds18b20::ping() {
         if (!m_one_wire.reset()) {
             continue;
         }
-        auto result = DeviceCommands::search_rom(m_one_wire, rom, 64);
+        std::optional<DeviceCommands::SearchInfo> result = DeviceCommands::search_rom(m_one_wire, rom, 64);
         if (result.has_value()) {
             DeviceCommands::SearchInfo info = result.value();
             if (info.rom != m_rom) {
@@ -156,6 +156,9 @@ Resolution Ds18b20::get_resolution() {
             return Resolution::VeryHigh;
             break;
         }
+        default: {
+            return Resolution::VeryHigh;
+        }
     }
 }
 
@@ -239,7 +242,7 @@ bool Ds18b20::is_alarm_active() {
         if (!m_one_wire.reset()) {
             continue;
         }
-        auto result = DeviceCommands::search_alarm(m_one_wire, rom, 64);
+        std::optional<DeviceCommands::SearchInfo> result = DeviceCommands::search_alarm(m_one_wire, rom, 64);
         if (result.has_value()) {
             DeviceCommands::SearchInfo info = result.value();
             if (info.rom == m_rom) {
