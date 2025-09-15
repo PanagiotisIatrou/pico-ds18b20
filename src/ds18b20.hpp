@@ -1,15 +1,19 @@
 #pragma once
 
-#include "device.hpp"
+#include "device_commands.hpp"
 
 #include "etl/vector.h"
 
 /**
  * Contains the functionality of a ds18b20 device.
  */
-class Ds18b20 : public Device {
+class Ds18b20 {
 private:
     OneWire& m_one_wire; ///< OneWire Object responsible for all OneWire communication.
+
+    Rom m_rom; ///< The Rom of the device
+
+    Scratchpad m_scratchpad; ///< The scratchpad of the device
 
     bool is_initialized; ///< The state of the device after initialization (constructor called).
     

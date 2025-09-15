@@ -2,19 +2,23 @@
 
 #include <stdio.h>
 
-Ds18b20::Ds18b20(OneWire& one_wire, Rom rom) : m_one_wire(one_wire), Device(one_wire, rom) {
+Ds18b20::Ds18b20(OneWire& one_wire, Rom rom) : m_one_wire(one_wire) {
+    m_rom = rom;
+
     // Read the scratchpad
     for (int t = 0; t < m_max_tries; t++) {
         if (!m_one_wire.reset()) {
             continue;
         }
-        match_rom();
-        if (!read_scratchpad()) {
+        DeviceCommands::match_rom(m_one_wire, m_rom);
+        std::optional scratchpad = DeviceCommands::read_scratchpad(m_one_wire);
+        if (scratchpad.has_value()) {
+            m_scratchpad = scratchpad.value();
+            is_initialized = true;
+            return;
+        } else {
             continue;
         }
-
-        is_initialized = true;
-        return;
     }
 
     is_initialized = false;
@@ -26,7 +30,7 @@ bool Ds18b20::is_successfully_initialized() {
 
 etl::vector<Ds18b20, 10> Ds18b20::find_devices(OneWire& one_wire) {
     etl::vector<Ds18b20, 10> devices;
-    Device::SearchInfo info{};
+    DeviceCommands::SearchInfo info{};
     info.last_choice_path_size = -2;
     while (info.last_choice_path_size != -1) {
         // Reset
@@ -41,7 +45,7 @@ etl::vector<Ds18b20, 10> Ds18b20::find_devices(OneWire& one_wire) {
         }
         
         // Grab a ROM
-        auto result = Device::search_rom(one_wire, info.last_choice_path, info.last_choice_path_size);
+        auto result = DeviceCommands::search_rom(one_wire, info.last_choice_path, info.last_choice_path_size);
         if (result.has_value()) {
             info = result.value();
             Ds18b20 device(one_wire, info.rom);
@@ -64,9 +68,9 @@ bool Ds18b20::ping() {
         if (!m_one_wire.reset()) {
             continue;
         }
-        auto result = Device::search_rom(m_one_wire, rom, 64);
+        auto result = DeviceCommands::search_rom(m_one_wire, rom, 64);
         if (result.has_value()) {
-            Device::SearchInfo info = result.value();
+            DeviceCommands::SearchInfo info = result.value();
             if (info.rom != m_rom) {
                 continue;
             }
@@ -78,8 +82,8 @@ bool Ds18b20::ping() {
         if (!m_one_wire.reset()) {
             continue;
         }
-        match_rom();
-        if (!read_power_supply()) {
+        DeviceCommands::match_rom(m_one_wire, m_rom);
+        if (!DeviceCommands::read_power_supply(m_one_wire)) {
             continue;
         }
 
@@ -97,8 +101,8 @@ std::optional<float> Ds18b20::measure_temperature() {
         if (!m_one_wire.reset()) {
             continue;
         }
-        match_rom();
-        if (!convert_t().has_value()) {
+        DeviceCommands::match_rom(m_one_wire, m_rom);
+        if (!DeviceCommands::convert_t(m_one_wire).has_value()) {
             continue;
         }
 
@@ -115,8 +119,11 @@ std::optional<float> Ds18b20::measure_temperature() {
         if (!m_one_wire.reset()) {
             continue;
         }
-        match_rom();
-        if (!read_scratchpad()) {
+        DeviceCommands::match_rom(m_one_wire, m_rom);
+        std::optional scratchpad = DeviceCommands::read_scratchpad(m_one_wire);
+        if (scratchpad.has_value()) {
+            m_scratchpad = scratchpad.value();
+        } else {
             continue;
         }
 
@@ -160,15 +167,18 @@ bool Ds18b20::set_scratchpad(int8_t temperature_high_limit, int8_t temperature_l
         if (!m_one_wire.reset()) {
             continue;
         }
-        match_rom();
-        write_scratchpad(temperature_high_limit, temperature_low_limit, configuration);
+        DeviceCommands::match_rom(m_one_wire, m_rom);
+        DeviceCommands::write_scratchpad(m_one_wire, temperature_high_limit, temperature_low_limit, configuration);
 
         // Read the scratchpad
         if (!m_one_wire.reset()) {
             continue;
         }
-        match_rom();
-        if (!read_scratchpad()) {
+        DeviceCommands::match_rom(m_one_wire, m_rom);
+        std::optional scratchpad = DeviceCommands::read_scratchpad(m_one_wire);
+        if (scratchpad.has_value()) {
+            m_scratchpad = scratchpad.value();
+        } else {
             continue;
         }
     
@@ -186,8 +196,8 @@ bool Ds18b20::set_scratchpad(int8_t temperature_high_limit, int8_t temperature_l
             if (!m_one_wire.reset()) {
                 continue;
             }
-            match_rom();
-            if (!copy_scratchpad().has_value()) {
+            DeviceCommands::match_rom(m_one_wire, m_rom);
+            if (!DeviceCommands::copy_scratchpad(m_one_wire).has_value()) {
                 continue;
             }
 
@@ -229,9 +239,9 @@ bool Ds18b20::is_alarm_active() {
         if (!m_one_wire.reset()) {
             continue;
         }
-        auto result = Device::search_alarm(m_one_wire, rom, 64);
+        auto result = DeviceCommands::search_alarm(m_one_wire, rom, 64);
         if (result.has_value()) {
-            Device::SearchInfo info = result.value();
+            DeviceCommands::SearchInfo info = result.value();
             if (info.rom == m_rom) {
                 return true;
             } else {

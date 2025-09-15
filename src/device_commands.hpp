@@ -9,8 +9,8 @@
 /**
  * Contains all ds18b20 rom/function commands.
  */
-class Device {
-protected:
+class DeviceCommands {
+public:
     /// The return type for search commands (search_rom, search_alarm)
     struct SearchInfo {
         Rom rom;
@@ -19,7 +19,7 @@ protected:
     };
     
 private:
-    OneWire& m_one_wire; ///< OneWire Object responsible for all OneWire communication
+    // OneWire& m_one_wire; ///< OneWire Object responsible for all OneWire communication
 
     /**
      * Conducts a search for a matching Rom according to the search function command (search_rom, search_alarm).
@@ -29,18 +29,9 @@ private:
      * @return If the search was successful, a Rom, the path just before the last choice and that path's length are returned.
      * If the search failed, std::nullopt is returned.
      */
-    static std::optional<Device::SearchInfo> search(OneWire& one_wire, uint64_t previous_sequence, int previous_sequence_length);
+    static std::optional<SearchInfo> search(OneWire& one_wire, uint64_t previous_sequence, int previous_sequence_length);
 
-protected:
-    /**
-     * Creates a Device object configured to the specified OneWire and Rom.
-     */
-    Device(OneWire& one_wire, Rom rom);
-
-    Rom m_rom; ///< The Rom of the device
-
-    Scratchpad m_scratchpad; ///< The scratchpad of the device
-
+public:
     // ROM commands
 
     /**
@@ -48,7 +39,7 @@ protected:
      * Only works when only 1 ds18b20 is connected on the same data pin (when it is the only device using
      * this specific OneWire object).
      */
-    void skip_rom();
+    static void skip_rom(OneWire& one_wire);
 
     /**
      * Reads the Rom of the only ds18b20 device connected.
@@ -62,7 +53,7 @@ protected:
     /**
      * Selects the Rom of this device as the Rom to act upon on the next function command.
      */
-    void match_rom();
+    static void match_rom(OneWire& one_wire, Rom& rom);
 
     /**
      * Conducts a search for a matching Rom.
@@ -72,7 +63,7 @@ protected:
      * @return If the search was successful, a Rom, the path just before the last choice and that path's length are returned.
      * If the search failed, std::nullopt is returned.
      */
-    static std::optional<Device::SearchInfo> search_rom(OneWire& one_wire, uint64_t previous_sequence, int previous_sequence_length);
+    static std::optional<SearchInfo> search_rom(OneWire& one_wire, uint64_t previous_sequence, int previous_sequence_length);
 
     /**
      * Conducts a search for a matching Rom which has its alarm flag raised.
@@ -82,7 +73,7 @@ protected:
      * @return If the search was successful, a Rom, the path just before the last choice and that path's length are returned.
      * If the search failed, std::nullopt is returned.
      */
-    static std::optional<Device::SearchInfo> search_alarm(OneWire& one_wire, uint64_t previous_sequence, int previous_sequence_length);
+    static std::optional<SearchInfo> search_alarm(OneWire& one_wire, uint64_t previous_sequence, int previous_sequence_length);
 
     // Function commands
 
@@ -91,13 +82,13 @@ protected:
      * @return If the measurement is successful, the time it took in milliseconds is returned.
      * If the measurement failed, std::nullopt is returned.
      */
-    std::optional<uint32_t> convert_t();
+    static std::optional<uint32_t> convert_t(OneWire& one_wire);
 
     /**
      * Reads the scratchpad of the selected device and stores it into the Rom object of this device.
      * @return True if the read was successful, false if not.
      */
-    bool read_scratchpad();
+    static std::optional<Scratchpad> read_scratchpad(OneWire& one_wire);
 
     /**
      * Overwrites the scratchpad with the parameter values.
@@ -105,18 +96,18 @@ protected:
      * @param temperature_low The lower temperature limit for triggering the alarm.
      * @param configuration Byte containing 2-bits indicating the resolution of the measurements.
      */
-    void write_scratchpad(int8_t temperature_high, int8_t temperature_low, uint8_t configuration);
+    static void write_scratchpad(OneWire& one_wire, int8_t temperature_high, int8_t temperature_low, uint8_t configuration);
 
     /**
      * Writes the scratchpad to the EEPROM.
      * @return If the writing is successful, the time it took in milliseconds is returned.
      * If the writing failed, std::nullopt is returned.
      */
-    std::optional<uint32_t> copy_scratchpad();
+    static std::optional<uint32_t> copy_scratchpad(OneWire& one_wire);
 
     /**
      * Fetches the power supply mode of the selected device.
      * @return True if external power, false if parasite.
      */
-    bool read_power_supply();
+    static bool read_power_supply(OneWire& one_wire);
 };
