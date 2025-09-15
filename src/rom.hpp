@@ -2,11 +2,14 @@
 
 #include <stdint.h>
 
+/**
+ * Contains functionality for accessing the Rom contained in each ds18b20
+ */
 class Rom {
 private:
-    uint8_t m_family_code;
-    uint8_t m_serial_number[6];
-    uint8_t m_crc_code;
+    uint8_t m_family_code; // The 8-bit family code of the device.
+    uint8_t m_serial_number[6]; // The 48-bit serial number of the device.
+    uint8_t m_crc_code; // The 8-bit CRC code of the device.
 
 public:
     /**
@@ -16,14 +19,14 @@ public:
 
     /**
      * Creates a Rom and fills it with the parameters.
-     * @param family_code The 8-bit family code of the device.
-     * @param serial_number The 48-bit serial number of the device.
-     * @param crc_code The 8-bit CRC code of the device.
+     * @param family_code The family code of the device.
+     * @param serial_number The serial number of the device.
+     * @param crc_code The CRC code of the device.
      */
     Rom(uint8_t family_code, uint8_t serial_number[6], uint8_t crc_code);
 
     /**
-     * @return The 8-bit family code of the device.
+     * @return The family code of the device.
      */
     uint8_t get_family_code();
 
@@ -34,7 +37,7 @@ public:
     uint8_t get_serial_number(int index);
 
     /**
-     * @return The 8-bit CRC code of the device.
+     * @return The CRC code of the device.
      */
     uint8_t get_crc_code();
 
