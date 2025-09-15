@@ -78,12 +78,10 @@ bool Ds18b20::ping() {
             continue;
         }
 
-        // Check that power supply is external 
-        if (!m_one_wire.reset()) {
-            continue;
-        }
-        DeviceCommands::match_rom(m_one_wire, m_rom);
-        if (!DeviceCommands::read_power_supply(m_one_wire)) {
+        // Check that power supply is external
+        std::optional<PowerSupplyMode> power_supply_mode = get_power_supply_mode();
+        if ((power_supply_mode.has_value() && power_supply_mode.value() == PowerSupplyMode::Parasite)
+             || !power_supply_mode.has_value()){
             continue;
         }
 
@@ -256,4 +254,19 @@ bool Ds18b20::is_alarm_active() {
     }
 
     return false;
+}
+
+std::optional<PowerSupplyMode> Ds18b20::get_power_supply_mode() {
+    bool ok = false;
+    for (int t = 0; t < m_max_tries; t++) {
+        if (!m_one_wire.reset()) {
+            continue;
+        }
+    }
+    if (!ok) {
+        return std::nullopt;
+    }
+
+    DeviceCommands::match_rom(m_one_wire, m_rom);
+    return DeviceCommands::read_power_supply_mode(m_one_wire);
 }

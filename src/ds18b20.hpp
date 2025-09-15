@@ -97,6 +97,13 @@ public:
     bool is_alarm_active();
 
     /**
+     * Reads the power supply mode of the device.
+     * @return If the read is successful, the power supply mode (External or Parasite) is returned. If it
+     * failed, std::nullopt is returned.
+     */
+    std::optional<PowerSupplyMode> get_power_supply_mode();
+
+    /**
      * Scans the GPIO pin specified in the OneWire object for connected devices. There can be more than one in a specific GPIO,
      * so a vector of Ds18b20 is returned instead.
      * @param one_wire The OneWire object to act upon.

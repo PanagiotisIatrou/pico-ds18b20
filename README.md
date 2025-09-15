@@ -164,6 +164,7 @@ if (is_operational) {
 - Set the low and high bounds of the temperature alarm range
   - The range is [-128, 127] as integers
 - Check if a device is operational
+- Fetch the power mode of the device (external or parasite)
 
 ## Resources
 

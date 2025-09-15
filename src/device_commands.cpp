@@ -166,9 +166,14 @@ std::optional<uint32_t> DeviceCommands::copy_scratchpad(OneWire& one_wire) {
     return std::nullopt;
 }
 
-bool DeviceCommands::read_power_supply(OneWire& one_wire) {
+PowerSupplyMode DeviceCommands::read_power_supply_mode(OneWire& one_wire) {
     uint8_t command = static_cast<uint8_t>(FunctionCommands::ReadPowerSupply);
     one_wire.write_byte(command);
 
-    return one_wire.read_bit();
+    bool bit = one_wire.read_bit();
+    if (bit) {
+        return PowerSupplyMode::External;
+    } else {
+        return PowerSupplyMode::Parasite;
+    }
 }

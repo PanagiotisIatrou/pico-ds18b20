@@ -6,6 +6,8 @@
 #include "scratchpad.hpp"
 #include "one_wire.hpp"
 
+enum class PowerSupplyMode { Parasite, External };
+
 /**
  * Contains all ds18b20 rom/function commands.
  */
@@ -107,7 +109,7 @@ public:
 
     /**
      * Fetches the power supply mode of the selected device.
-     * @return True if external power, false if parasite.
+     * @return The power supply mode (External or Parasite)
      */
-    static bool read_power_supply(OneWire& one_wire);
+    static PowerSupplyMode read_power_supply_mode(OneWire& one_wire);
 };
