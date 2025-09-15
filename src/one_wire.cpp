@@ -7,16 +7,6 @@ OneWire::OneWire(int data_pin) : m_data_pin(data_pin) {
     gpio_pull_up(data_pin);
 }
 
-OneWireState OneWire::get_state() {
-    return m_state;
-}
-
-void OneWire::set_state(OneWireState state) {
-    state = state;
-    bool gpio_state = state == OneWireState::READ ? GPIO_IN : GPIO_OUT;
-    gpio_set_dir(m_data_pin, gpio_state);
-}
-
 bool OneWire::get_pin_value() {
     return gpio_get(m_data_pin);
 }
@@ -99,12 +89,12 @@ uint8_t OneWire::calculate_crc_byte(uint8_t crc, uint8_t byte) {
 
 bool OneWire::reset() {
     // Write 0 to initialize connection
-    set_state(OneWireState::WRITE);
+    gpio_set_dir(m_data_pin, GPIO_OUT);
     set_pin_value(0);
     sleep_us(500);
 
     // Wait for presence pulse
-    set_state(OneWireState::READ);
+    gpio_set_dir(m_data_pin, GPIO_IN);
     sleep_us(5);
     bool detected_presence_pulse = wait_us_for_bit(0, 240 + 55);
     if (!detected_presence_pulse) {

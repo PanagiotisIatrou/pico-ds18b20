@@ -2,26 +2,12 @@
 
 #include <stdint.h>
 
-enum OneWireState { READ, WRITE };
-
 /**
  * Contains functionality for the 1-Wire protocol used for ds18b20 communication.
  */
 class OneWire {
 private:
     int m_data_pin; ///< The GPIO used for data communication
-    OneWireState m_state; ///< The current state of the GPIO (read or write)
-
-    /**
-     * @return The current GPIO read/write state.
-     */
-    OneWireState get_state();
-
-    /**
-     * Sets the current GPIO read/write state.
-     * @param state Read or Write.
-     */
-    void set_state(OneWireState state);
 
     /**
      * Reads whether the data pin is set to low or high.
