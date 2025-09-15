@@ -262,6 +262,9 @@ std::optional<PowerSupplyMode> Ds18b20::get_power_supply_mode() {
         if (!m_one_wire.reset()) {
             continue;
         }
+
+        ok = true;
+        break;
     }
     if (!ok) {
         return std::nullopt;
