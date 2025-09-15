@@ -22,6 +22,14 @@ int main()
         return 0;
     }
 
+    // Check if the devices are successfully initialized
+    for (int i = 0; i < devices.size(); i++) {
+        if (!devices[i].is_successfully_initialized()) {
+            printf("Could not initialize device index %d\n", i);
+            return 0;
+        }
+    }
+
     // Set the resolution of the devices
     for (int i = 0; i < devices.size(); i++) {
         bool success = devices[i].set_resolution(Resolution::VeryHigh, true);

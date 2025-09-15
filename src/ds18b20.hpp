@@ -15,7 +15,7 @@ private:
 
     Scratchpad m_scratchpad; ///< The scratchpad of the device
 
-    bool is_initialized; ///< The state of the device after initialization (constructor called).
+    bool is_initialized = false; ///< The state of the device after initialization (constructor called).
     
     static const int m_max_tries = 10; ///< The maximum amount of tries before a command fails (indicates device failure).
 

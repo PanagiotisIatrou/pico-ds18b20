@@ -6,6 +6,7 @@ Ds18b20::Ds18b20(OneWire& one_wire, Rom rom) : m_one_wire(one_wire) {
     m_rom = rom;
 
     // Read the scratchpad
+    bool ok = false;
     for (int t = 0; t < m_max_tries; t++) {
         if (!m_one_wire.reset()) {
             continue;
@@ -14,14 +15,23 @@ Ds18b20::Ds18b20(OneWire& one_wire, Rom rom) : m_one_wire(one_wire) {
         std::optional scratchpad = DeviceCommands::read_scratchpad(m_one_wire);
         if (scratchpad.has_value()) {
             m_scratchpad = scratchpad.value();
-            is_initialized = true;
-            return;
+            ok = true;
         } else {
             continue;
         }
     }
+    if (!ok) {
+        return;
+    }
 
-    is_initialized = false;
+    // Check that power supply is external
+    std::optional<PowerSupplyMode> power_supply_mode = get_power_supply_mode();
+    if ((power_supply_mode.has_value() && power_supply_mode.value() == PowerSupplyMode::Parasite)
+            || !power_supply_mode.has_value()){
+        return;
+    }
+
+    is_initialized = true;
 }
 
 bool Ds18b20::is_successfully_initialized() {
