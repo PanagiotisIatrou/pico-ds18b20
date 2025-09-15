@@ -87,14 +87,19 @@ Find all the ds18b20 devices connected to GPIO 0
 #include "ds18b20.hpp"
 
 OneWire one_wire(0);
+
+// Find all devices at pin 0
 etl::vector<Ds18b20, 10> devices = Ds18b20::find_devices(one_wire);
+
+// Check if they are successfully initialized
 for (int i = 0; i < devices.size(); i++) {
     if (!devices[i].is_successfully_initialized()) {
         printf("Could not initialize device index %d. Do not use!\n", i);
     }
 }
 
-Ds18b20& device = devices[0];
+// Select device index i
+Ds18b20& device = devices[i];
 // ...
 ```
 
